@@ -1,0 +1,2286 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر رشق - حسابات التواصل الاجتماعي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js">
+    </script>
+
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #14141f;
+            --surface2: #1a1a2e;
+            --glass: rgba(20, 20, 40, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #7c3aed;
+            --primary-glow: rgba(124, 58, 237, 0.4);
+            --accent: #a78bfa;
+            --gold: #f59e0b;
+            --text: #e2e8f0;
+            --text2: #a0aec0;
+            --text3: #718096;
+            --danger: #ef4444;
+            --success: #10b981;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 8px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 40px var(--primary-glow);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'Tajawal', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 30% 20%, rgba(124, 58, 237, 0.06) 0%, transparent 55%),
+                radial-gradient(ellipse at 70% 60%, rgba(167, 139, 250, 0.04) 0%, transparent 55%),
+                radial-gradient(ellipse at 50% 80%, rgba(245, 158, 11, 0.03) 0%, transparent 50%);
+            z-index: -1;
+            animation: bgShift 20s ease-in-out infinite;
+        }
+        @keyframes bgShift {
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+            33% {
+                transform: translate(2%, -1%);
+            }
+            66% {
+                transform: translate(-1%, 2%);
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--surface2);
+            border-radius: 10px;
+        }
+        #splashScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.6s, visibility 0.6s;
+        }
+        #splashScreen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .splash-logo {
+            font-size: 70px;
+            color: var(--primary);
+            animation: splashPulse 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px var(--primary-glow));
+        }
+        @keyframes splashPulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.12);
+            }
+        }
+        .splash-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-top: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--accent), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+        .splash-loader {
+            width: 50px;
+            height: 4px;
+            background: var(--surface2);
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .splash-loader div {
+            height: 100%;
+            width: 40%;
+            background: var(--primary);
+            border-radius: 10px;
+            animation: splashLoad 1.2s ease-in-out infinite;
+        }
+        @keyframes splashLoad {
+            0% {
+                transform: translateX(-120%);
+            }
+            100% {
+                transform: translateX(280%);
+            }
+        }
+        #authContainer {
+            display: none;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #authContainer.active {
+            display: flex;
+        }
+        .auth-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 35px 28px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow-lg);
+            animation: fadeUp 0.5s ease;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .auth-card h2 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .auth-card .subtitle {
+            text-align: center;
+            color: var(--text2);
+            font-size: 13px;
+            margin-bottom: 24px;
+        }
+        .auth-card .logo-icon {
+            text-align: center;
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 20px var(--primary-glow));
+        }
+        .input-group {
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text2);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 13px 16px;
+            padding-right: 40px;
+            background: var(--surface2);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 15px;
+            transition: var(--transition);
+            outline: none;
+            font-family: inherit;
+        }
+        .input-group textarea {
+            padding-right: 16px;
+            min-height: 70px;
+            resize: vertical;
+        }
+        .input-group input:focus,
+        .input-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+        .input-group i {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            color: var(--text3);
+            font-size: 16px;
+            pointer-events: none;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+            letter-spacing: 0.5px;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.3);
+        }
+        .btn-primary:hover {
+            background: #6d28d9;
+            box-shadow: 0 12px 35px rgba(124, 58, 237, 0.45);
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--primary);
+            color: var(--primary);
+            margin-top: 8px;
+        }
+        .btn-outline:hover {
+            background: rgba(124, 58, 237, 0.08);
+        }
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+            width: auto;
+            border-radius: var(--radius-xs);
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+        .btn-gold {
+            background: var(--gold);
+            color: #000;
+            font-weight: 700;
+        }
+        .auth-switch {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 13px;
+            color: var(--text2);
+        }
+        .auth-switch a {
+            color: var(--accent);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        #appContainer {
+            display: none;
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding-bottom: 90px;
+            position: relative;
+        }
+        #appContainer.active {
+            display: block;
+        }
+        .app-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .app-header .greeting {
+            font-size: 13px;
+            color: var(--text2);
+        }
+        .app-header .username-display {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .header-icons {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        .header-icons i {
+            font-size: 20px;
+            color: var(--text);
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+        .header-icons i:hover {
+            color: var(--accent);
+        }
+        .notif-badge {
+            position: absolute;
+            top: -6px;
+            right: -8px;
+            background: var(--danger);
+            color: #fff;
+            font-size: 10px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .ad-banner-container {
+            padding: 12px 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .ad-banner {
+            background: var(--glass);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        .ad-banner::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.04) 50%, transparent 60%);
+            animation: shimmerMove 3s ease-in-out infinite;
+        }
+        @keyframes shimmerMove {
+            0% {
+                transform: translateX(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) rotate(45deg);
+            }
+        }
+        .ad-banner:hover {
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 12px 40px rgba(124, 58, 237, 0.2);
+            transform: translateY(-2px);
+        }
+        .ad-banner .ad-text {
+            flex: 1;
+            z-index: 1;
+        }
+        .ad-banner .ad-tag {
+            font-size: 11px;
+            background: var(--danger);
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            animation: pulseTag 1.5s ease-in-out infinite;
+        }
+        @keyframes pulseTag {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        .ad-banner .ad-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .ad-banner .ad-btn {
+            z-index: 1;
+            background: var(--primary);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+            transition: var(--transition);
+        }
+        .ad-banner .ad-btn:hover {
+            background: #8b5cf6;
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.6);
+        }
+        .section-title {
+            font-size: 17px;
+            font-weight: 700;
+            padding: 0 16px;
+            margin: 20px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title i {
+            color: var(--primary);
+        }
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 0 16px;
+            margin-bottom: 8px;
+        }
+        .platform-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 16px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+        .platform-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.15);
+            transform: translateY(-3px);
+        }
+        .platform-card i {
+            font-size: 30px;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .platform-card .plat-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text2);
+        }
+        .platform-card.instagram i {
+            color: #e1306c;
+        }
+        .platform-card.facebook i {
+            color: #1877f2;
+        }
+        .platform-card.tiktok i {
+            color: #fff;
+            text-shadow: 0 0 10px #ff0050;
+        }
+        .platform-card.youtube i {
+            color: #ff0000;
+        }
+        .platform-card.snapchat i {
+            color: #fffc00;
+        }
+        .platform-card.twitter i {
+            color: #1da1f2;
+        }
+        .platform-card.telegram i {
+            color: #26a5e4;
+        }
+        .platform-card.whatsapp i {
+            color: #25d366;
+        }
+        .offers-scroll {
+            display: flex;
+            gap: 12px;
+            padding: 0 16px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 6px;
+        }
+        .offer-card {
+            min-width: 240px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 16px;
+            scroll-snap-align: start;
+            transition: var(--transition);
+            flex-shrink: 0;
+            cursor: pointer;
+            position: relative;
+        }
+        .offer-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        .offer-card .offer-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: var(--danger);
+            color: #fff;
+            font-size: 10px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+        .offer-card .offer-platform {
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+        .offer-card .offer-name {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .offer-card .offer-desc {
+            font-size: 12px;
+            color: var(--text2);
+            margin-bottom: 8px;
+        }
+        .offer-card .offer-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .offer-card .offer-price {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+        .offer-card .offer-old-price {
+            font-size: 13px;
+            color: var(--text3);
+            text-decoration: line-through;
+            margin-right: 6px;
+        }
+        .stars-display {
+            display: flex;
+            gap: 2px;
+            align-items: center;
+        }
+        .stars-display i {
+            color: var(--gold);
+            font-size: 14px;
+        }
+        .stars-display i.empty {
+            color: var(--text3);
+        }
+        .rating-number {
+            font-size: 12px;
+            color: var(--text2);
+            margin-right: 4px;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(20, 20, 30, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 14px;
+            z-index: 200;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .bottom-nav .nav-item {
+            text-align: center;
+            cursor: pointer;
+            color: var(--text3);
+            transition: var(--transition);
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .bottom-nav .nav-item i {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .bottom-nav .nav-item.active {
+            color: var(--primary);
+        }
+        .bottom-nav .nav-item:hover {
+            color: var(--accent);
+        }
+        .page-content {
+            padding: 10px 0;
+            animation: fadeUp 0.4s ease;
+        }
+        .page-section {
+            display: none;
+        }
+        .page-section.active {
+            display: block;
+        }
+        .settings-item {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .settings-item:hover {
+            border-color: var(--primary);
+        }
+        .settings-item .si-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .settings-item .si-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--surface2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            color: var(--accent);
+        }
+        .settings-item .si-text {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .settings-item .si-sub {
+            font-size: 11px;
+            color: var(--text3);
+        }
+        .toggle-switch {
+            width: 48px;
+            height: 26px;
+            background: var(--surface2);
+            border-radius: 26px;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--glass-border);
+        }
+        .toggle-switch.on {
+            background: var(--primary);
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            right: 3px;
+            transition: var(--transition);
+        }
+        .toggle-switch.on::after {
+            right: 23px;
+        }
+        .payment-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .payment-card .pay-info {
+            flex: 1;
+        }
+        .payment-card .pay-name {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+        .payment-card .pay-number {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--accent);
+            letter-spacing: 1px;
+            font-family: 'Courier New', monospace;
+        }
+        .payment-card .pay-type {
+            font-size: 11px;
+            color: var(--text3);
+        }
+        .copy-btn {
+            background: var(--surface2);
+            border: 1px solid var(--glass-border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: var(--radius-xs);
+            cursor: pointer;
+            font-size: 13px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .copy-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .copy-btn.copied {
+            background: var(--success);
+            color: #fff;
+            border-color: var(--success);
+        }
+        .upload-area {
+            border: 2px dashed var(--glass-border);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            margin: 12px 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--surface);
+        }
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(124, 58, 237, 0.04);
+        }
+        .upload-area i {
+            font-size: 40px;
+            color: var(--text3);
+            margin-bottom: 8px;
+        }
+        .upload-area img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: var(--radius-sm);
+            margin-top: 10px;
+        }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 24px;
+            width: 100%;
+            max-width: 440px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: fadeUp 0.4s ease;
+        }
+        .modal h3 {
+            margin-bottom: 16px;
+            font-size: 18px;
+            text-align: center;
+        }
+        .modal .close-modal {
+            float: left;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--text3);
+            transition: var(--transition);
+        }
+        .modal .close-modal:hover {
+            color: var(--danger);
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 55vh;
+            max-height: 500px;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .chat-msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 13px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+        .chat-msg.sent {
+            background: var(--primary);
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-left-radius: 6px;
+        }
+        .chat-msg.received {
+            background: var(--surface2);
+            color: var(--text);
+            align-self: flex-start;
+            border-bottom-right-radius: 6px;
+        }
+        .chat-msg .msg-time {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 4px;
+            text-align: left;
+        }
+        .chat-input-row {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            border-top: 1px solid var(--glass-border);
+        }
+        .chat-input-row input {
+            flex: 1;
+            padding: 10px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            color: var(--text);
+            outline: none;
+            font-family: inherit;
+        }
+        .exp-gallery {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 0 16px;
+            margin-top: 10px;
+        }
+        .exp-card {
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        .exp-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+        }
+        .exp-card .exp-label {
+            padding: 8px 10px;
+            font-size: 11px;
+            text-align: center;
+            color: var(--text2);
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            z-index: 9999;
+            font-size: 14px;
+            animation: toastIn 0.4s ease, toastOut 0.4s ease 2s forwards;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-30px);
+            }
+        }
+        #adminContainer {
+            display: none;
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding: 16px;
+            padding-bottom: 40px;
+        }
+        #adminContainer.active {
+            display: block;
+        }
+        .admin-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .admin-card h4 {
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .admin-table th,
+        .admin-table td {
+            padding: 8px 6px;
+            border-bottom: 1px solid var(--glass-border);
+            text-align: center;
+        }
+        .admin-table th {
+            color: var(--text2);
+            font-weight: 600;
+        }
+        select {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--glass-border);
+            padding: 8px 12px;
+            border-radius: var(--radius-xs);
+            font-family: inherit;
+            outline: none;
+        }
+        textarea {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--glass-border);
+            padding: 10px;
+            border-radius: var(--radius-xs);
+            width: 100%;
+            font-family: inherit;
+            outline: none;
+            resize: vertical;
+            min-height: 70px;
+        }
+        @media (max-width: 380px) {
+            .platform-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            .offer-card {
+                min-width: 200px;
+            }
+            .ad-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Splash Screen -->
+    <div id="splashScreen">
+        <div class="splash-logo"><i class="fa-solid fa-rocket"></i></div>
+        <div class="splash-title">متجر رشق</div>
+        <div class="splash-loader"><div></div></div>
+    </div>
+
+    <!-- Auth Container -->
+    <div id="authContainer">
+        <div class="auth-card" id="loginCard">
+            <div class="logo-icon"><i class="fa-solid fa-user-shield"></i></div>
+            <h2>تسجيل الدخول</h2>
+            <p class="subtitle">مرحباً بعودتك! سجل دخولك للمتابعة</p>
+            <div class="input-group"><label>البريد الإلكتروني</label><input type="email" id="loginEmail" placeholder="example@email.com"><i class="fa-solid fa-envelope"></i></div>
+            <div class="input-group"><label>كلمة المرور</label><input type="password" id="loginPass" placeholder="••••••••"><i class="fa-solid fa-lock"></i></div>
+            <button class="btn btn-primary" onclick="handleLogin()">دخول <i class="fa-solid fa-arrow-left"></i></button>
+            <p class="auth-switch">ليس لديك حساب؟ <a onclick="showRegister()">إنشاء حساب جديد</a></p>
+        </div>
+        <div class="auth-card" id="registerCard" style="display:none;">
+            <div class="logo-icon"><i class="fa-solid fa-user-plus"></i></div>
+            <h2>إنشاء حساب</h2>
+            <p class="subtitle">انضم إلينا وابدأ بتعزيز حساباتك</p>
+            <div class="input-group"><label>الاسم الكامل</label><input type="text" id="regName" placeholder="اسمك الكريم"><i class="fa-solid fa-user"></i></div>
+            <div class="input-group"><label>البريد الإلكتروني</label><input type="email" id="regEmail" placeholder="example@email.com"><i class="fa-solid fa-envelope"></i></div>
+            <div class="input-group"><label>كلمة المرور</label><input type="password" id="regPass" placeholder="••••••••"><i class="fa-solid fa-lock"></i></div>
+            <button class="btn btn-primary" onclick="handleRegister()">إنشاء الحساب <i class="fa-solid fa-check"></i></button>
+            <p class="auth-switch">لديك حساب بالفعل؟ <a onclick="showLogin()">تسجيل الدخول</a></p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="appContainer">
+        <div class="app-header">
+            <div>
+                <div class="greeting">مرحباً</div>
+                <div class="username-display" id="displayName">مستخدم</div>
+            </div>
+            <div class="header-icons">
+                <i class="fa-solid fa-bell" onclick="openNotifications()" style="position:relative;"><span class="notif-badge" id="notifBadge" style="display:none;">0</span></i>
+                <i class="fa-solid fa-headset" onclick="openChat()"></i>
+                <i class="fa-solid fa-right-from-bracket" onclick="logout()" style="font-size:17px;"></i>
+            </div>
+        </div>
+        <div class="ad-banner-container" id="adBannerContainer">
+            <div class="ad-banner" id="mainAdBanner" onclick="goToAdOffer()">
+                <div class="ad-text">
+                    <span class="ad-tag">🔥 عرض مميز</span>
+                    <div class="ad-title" id="adTitle">خصم 30% على جميع خدمات الانستغرام!</div>
+                </div>
+                <button class="ad-btn">اطلب الآن</button>
+            </div>
+        </div>
+        <div class="page-section active" id="pageHome">
+            <div class="page-content">
+                <div class="section-title"><i class="fa-solid fa-globe"></i> المنصات</div>
+                <div class="platform-grid" id="platformGrid"></div>
+                <div class="section-title"><i class="fa-solid fa-fire"></i> العروض المميزة</div>
+                <div class="offers-scroll" id="offersScroll"></div>
+                <div class="section-title"><i class="fa-solid fa-star"></i> تقييمات المستخدمين <span class="rating-number" id="avgRatingDisplay">(0)</span></div>
+                <div style="padding:0 16px;display:flex;align-items:center;gap:4px;" id="avgStarsDisplay"></div>
+            </div>
+        </div>
+        <div class="page-section" id="pageOrders">
+            <div class="page-content">
+                <div class="section-title"><i class="fa-solid fa-clipboard-list"></i> طلباتي</div>
+                <div id="myOrdersList" style="padding:0 16px;"></div>
+            </div>
+        </div>
+        <div class="page-section" id="pageSettings">
+            <div class="page-content">
+                <div class="section-title"><i class="fa-solid fa-cog"></i> الإعدادات</div>
+                <div class="settings-item" onclick="toggleLang()">
+                    <div class="si-left"><div class="si-icon"><i class="fa-solid fa-language"></i></div><div><div class="si-text">اللغة</div><div class="si-sub" id="langLabel">العربية</div></div></div>
+                    <i class="fa-solid fa-chevron-left"></i>
+                </div>
+                <div class="settings-item" onclick="toggleNotificationsSetting()">
+                    <div class="si-left"><div class="si-icon"><i class="fa-solid fa-bell"></i></div><div><div class="si-text">الإشعارات</div><div class="si-sub">تفعيل / تعطيل الإشعارات</div></div></div>
+                    <div class="toggle-switch on" id="notifToggle"></div>
+                </div>
+                <div class="settings-item" onclick="openExperienceGallery()">
+                    <div class="si-left"><div class="si-icon"><i class="fa-solid fa-images"></i></div><div><div class="si-text">تجربة المستخدمين</div><div class="si-sub">صور قبل وبعد</div></div></div>
+                    <i class="fa-solid fa-chevron-left"></i>
+                </div>
+                <div class="settings-item" onclick="openRatingModal()">
+                    <div class="si-left"><div class="si-icon"><i class="fa-solid fa-star"></i></div><div><div class="si-text">تقييم التطبيق</div><div class="si-sub">قيم تجربتك</div></div></div>
+                    <i class="fa-solid fa-chevron-left"></i>
+                </div>
+                <div class="settings-item" onclick="openPaymentInfo()">
+                    <div class="si-left"><div class="si-icon"><i class="fa-solid fa-credit-card"></i></div><div><div class="si-text">طرق الدفع</div><div class="si-sub">عرض معلومات الدفع</div></div></div>
+                    <i class="fa-solid fa-chevron-left"></i>
+                </div>
+                <div class="settings-item" onclick="window.open('https://www.instagram.com/th2f6?igsh=MW01MWlvcXl3NjY4','_blank')">
+                    <div class="si-left"><div class="si-icon"><i class="fa-brands fa-instagram"></i></div><div><div class="si-text">تواصل عبر انستغرام</div><div class="si-sub">@th2f6</div></div></div>
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bottom-nav">
+            <div class="nav-item active" data-page="pageHome" onclick="switchPage('pageHome',this)"><i class="fa-solid fa-house"></i> الرئيسية</div>
+            <div class="nav-item" data-page="pageOrders" onclick="switchPage('pageOrders',this)"><i class="fa-solid fa-receipt"></i> طلباتي</div>
+            <div class="nav-item" data-page="pageSettings" onclick="switchPage('pageSettings',this)"><i class="fa-solid fa-sliders"></i> الإعدادات</div>
+        </div>
+    </div>
+
+    <!-- Admin Container -->
+    <div id="adminContainer">
+        <div class="app-header" style="margin-bottom:16px;">
+            <div><div class="username-display">لوحة التحكم</div><div class="greeting">Admin</div></div>
+            <button class="btn btn-sm btn-danger" onclick="logout()">خروج</button>
+        </div>
+        <div class="admin-card">
+            <h4><i class="fa-solid fa-tags"></i> إدارة العروض</h4>
+            <button class="btn btn-sm btn-primary" onclick="openAddOfferModal()" style="margin-bottom:10px;">+ إضافة عرض</button>
+            <div style="overflow-x:auto;"><table class="admin-table" id="adminOffersTable"><thead><tr><th>المنصة</th><th>الاسم</th><th>السعر</th><th>الخصم</th><th>إجراءات</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="admin-card">
+            <h4><i class="fa-solid fa-rectangle-ad"></i> إدارة الإعلانات</h4>
+            <button class="btn btn-sm btn-primary" onclick="openAddAdModal()" style="margin-bottom:10px;">+ إضافة إعلان</button>
+            <div style="overflow-x:auto;"><table class="admin-table" id="adminAdsTable"><thead><tr><th>النص</th><th>رابط العرض</th><th>إجراءات</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="admin-card">
+            <h4><i class="fa-solid fa-receipt"></i> الطلبات الواردة</h4>
+            <div id="adminOrdersList"></div>
+        </div>
+        <div class="admin-card">
+            <h4><i class="fa-solid fa-comments"></i> الدعم الفوري</h4>
+            <select id="adminUserSelect" onchange="adminLoadUserChat()" style="width:100%;margin-bottom:8px;">
+                <option value="">-- اختر مستخدم --</option>
+            </select>
+            <div class="chat-container" id="adminChatContainer" style="height:35vh;">
+                <div class="chat-messages" id="adminChatMessages"></div>
+                <div class="chat-input-row">
+                    <input type="text" id="adminChatInput" placeholder="اكتب رسالة...">
+                    <button class="btn btn-sm btn-primary" onclick="adminSendMessage()">إرسال</button>
+                </div>
+            </div>
+        </div>
+        <div class="admin-card">
+            <h4><i class="fa-solid fa-bell"></i> إرسال إشعار</h4>
+            <textarea id="notifMessage" placeholder="نص الإشعار..."></textarea>
+            <button class="btn btn-sm btn-gold" onclick="sendGlobalNotification()" style="margin-top:8px;">إرسال للجميع</button>
+        </div>
+        <div class="admin-card">
+            <h4><i class="fa-solid fa-images"></i> صور تجربة المستخدمين</h4>
+            <input type="file" id="expImageInput" accept="image/*" onchange="uploadExpImage()" style="margin-bottom:8px;">
+            <div style="display:flex;flex-wrap:wrap;gap:8px;" id="adminExpImages"></div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modalContainer"></div>
+
+    <script>
+        // ==================== FIREBASE CONFIG ====================
+        // ⚠️ استبدل هذه البيانات ببيانات مشروعك من Firebase Console
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBbRaAuYo6KhH7K6-byjp4SCou0DS4IXc",
+            authDomain: "http://surtur-5d667.firebaseapp.com",
+            projectId: "surtur-5d667",
+            storageBucket: "http://surtur-5d667.firebasestorage.app",
+            messagingSenderId: "360949474558",
+            appId: "1:360949474558:web:9d0d277fac1aebbf7631af"
+        };
+
+        // تهيئة Firebase
+        let db;
+        let firestoreReady = false;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            firestoreReady = true;
+            console.log('✅ Firebase Firestore جاهز');
+        } catch (e) {
+            console.error('❌ فشل تهيئة Firebase. تأكد من صحة firebaseConfig');
+            alert('⚠️ لم يتم ربط Firebase. الرجاء إدخال بيانات المشروع الصحيحة في كود HTML.\n\nاذهب إلى Firebase Console > إعدادات المشروع > تطبيقات الويب.');
+        }
+
+        // ==================== APP STATE ====================
+        let currentUser = null;
+        let notifEnabled = true;
+        let currentLang = 'ar';
+        let allOffers = [];
+        let allAds = [];
+        let allOrders = [];
+        let allNotifications = [];
+        let allRatings = [];
+        let allExpImages = [];
+        let allUsers = [];
+
+        // Real-time listener cleanup functions
+        let unsubOffers = null;
+        let unsubAds = null;
+        let unsubOrders = null;
+        let unsubNotifications = null;
+        let unsubRatings = null;
+        let unsubExpImages = null;
+        let unsubMessages = null;
+
+        // ==================== FIREBASE HELPERS ====================
+        async function ensureAdminExists() {
+            if (!firestoreReady) return;
+            const adminEmail = 'admin@mtger.iq';
+            const docRef = db.collection('users').doc(adminEmail);
+            const doc = await docRef.get();
+            if (!doc.exists) {
+                await docRef.set({
+                    name: 'المدير',
+                    email: adminEmail,
+                    password: 'Admin123',
+                    isAdmin: true,
+                    createdAt: Date.now()
+                });
+                console.log('👤 تم إنشاء حساب الأدمن الافتراضي');
+            }
+        }
+
+        async function seedDefaultData() {
+            if (!firestoreReady) return;
+            const offersSnap = await db.collection('offers').limit(1).get();
+            if (offersSnap.empty) {
+                const defaultOffers = [
+                    { platform: 'instagram', name: 'رشق انستغرام - 1000 متابع', desc: 'متابعين حقيقيين مع ضمان',
+                        price: 15000, oldPrice: 22000, discount: true, active: true, createdAt: Date.now() },
+                    { platform: 'facebook', name: 'رشق فيسبوك - 500 لايك', desc: 'لايكات صفحة مع ضمان', price: 8000,
+                        oldPrice: 12000, discount: true, active: true, createdAt: Date.now() },
+                    { platform: 'tiktok', name: 'رشق تيك توك - 2000 مشاهدة', desc: 'مشاهدات سريعة وآمنة', price: 10000,
+                        oldPrice: 16000, discount: true, active: true, createdAt: Date.now() },
+                    { platform: 'youtube', name: 'رشق يوتيوب - 500 مشترك', desc: 'مشتركين حقيقيين', price: 25000,
+                        oldPrice: 35000, discount: true, active: true, createdAt: Date.now() },
+                    { platform: 'instagram', name: 'رشق انستغرام - 5000 متابع', desc: 'باقة المحترفين', price: 45000,
+                        oldPrice: 65000, discount: true, active: true, createdAt: Date.now() },
+                    { platform: 'snapchat', name: 'رشق سناب - 1000 متابع', desc: 'متابعين نشطين', price: 12000,
+                        oldPrice: 18000, discount: false, active: true, createdAt: Date.now() },
+                ];
+                const batch = db.batch();
+                defaultOffers.forEach(o => batch.set(db.collection('offers').doc(), o));
+                await batch.commit();
+                console.log('🎁 تم إنشاء العروض الافتراضية');
+            }
+            const adsSnap = await db.collection('ads').limit(1).get();
+            if (adsSnap.empty) {
+                const defaultAds = [
+                    { text: 'خصم 30% على جميع خدمات الانستغرام!', offerId: null, active: true, createdAt: Date.now() },
+                    { text: 'عرض حصري: رشق تيك توك بأسعار مخفضة!', offerId: null, active: true, createdAt: Date.now() },
+                ];
+                const batch = db.batch();
+                defaultAds.forEach(a => batch.set(db.collection('ads').doc(), a));
+                await batch.commit();
+                console.log('📢 تم إنشاء الإعلانات الافتراضية');
+            }
+            const notifSnap = await db.collection('notifications').limit(1).get();
+            if (notifSnap.empty) {
+                await db.collection('notifications').add({
+                    text: 'مرحباً بك في متجر رشق! 🚀',
+                    time: Date.now(),
+                    readBy: []
+                });
+            }
+        }
+
+        // ==================== REAL-TIME LISTENERS ====================
+        function setupRealtimeListeners() {
+            if (!firestoreReady) return;
+            // Offers listener
+            unsubOffers = db.collection('offers').onSnapshot(snapshot => {
+                allOffers = [];
+                snapshot.forEach(doc => { allOffers.push({ id: doc.id, ...doc.data() }); });
+                if (document.getElementById('appContainer').classList.contains('active')) {
+                    renderOffers();
+                    renderAdminOffersIfActive();
+                }
+                if (document.getElementById('adminContainer').classList.contains('active')) {
+                    renderAdminOffersIfActive();
+                }
+            });
+            // Ads listener
+            unsubAds = db.collection('ads').onSnapshot(snapshot => {
+                allAds = [];
+                snapshot.forEach(doc => { allAds.push({ id: doc.id, ...doc.data() }); });
+                if (document.getElementById('appContainer').classList.contains('active')) {
+                    renderAds();
+                    renderAdminAdsIfActive();
+                }
+                if (document.getElementById('adminContainer').classList.contains('active')) {
+                    renderAdminAdsIfActive();
+                }
+            });
+            // Orders listener
+            unsubOrders = db.collection('orders').onSnapshot(snapshot => {
+                allOrders = [];
+                snapshot.forEach(doc => { allOrders.push({ id: doc.id, ...doc.data() }); });
+                if (document.getElementById('appContainer').classList.contains('active')) {
+                    if (document.getElementById('pageOrders').classList.contains('active')) renderMyOrders();
+                }
+                if (document.getElementById('adminContainer').classList.contains('active')) {
+                    renderAdminOrders();
+                }
+            });
+            // Notifications listener
+            unsubNotifications = db.collection('notifications').onSnapshot(snapshot => {
+                allNotifications = [];
+                snapshot.forEach(doc => { allNotifications.push({ id: doc.id, ...doc.data() }); });
+                updateNotifBadge();
+            });
+            // Ratings listener
+            unsubRatings = db.collection('ratings').onSnapshot(snapshot => {
+                allRatings = [];
+                snapshot.forEach(doc => { allRatings.push({ id: doc.id, ...doc.data() }); });
+                if (document.getElementById('appContainer').classList.contains('active')) {
+                    renderAvgRating();
+                }
+            });
+            // ExpImages listener
+            unsubExpImages = db.collection('expImages').onSnapshot(snapshot => {
+                allExpImages = [];
+                snapshot.forEach(doc => { allExpImages.push({ id: doc.id, ...doc.data() }); });
+                if (document.getElementById('adminContainer').classList.contains('active')) {
+                    renderAdminExpImages();
+                }
+            });
+            // Users listener (for admin chat select)
+            db.collection('users').onSnapshot(snapshot => {
+                allUsers = [];
+                snapshot.forEach(doc => { allUsers.push({ id: doc.id, ...doc.data() }); });
+                if (document.getElementById('adminContainer').classList.contains('active')) {
+                    renderAdminUserSelect();
+                }
+            });
+        }
+
+        function renderAdminOffersIfActive() {
+            const tbody = document.querySelector('#adminOffersTable tbody');
+            if (!tbody) return;
+            const activeOffers = allOffers.filter(o => o.active !== false);
+            tbody.innerHTML = activeOffers.map(o => `
+            <tr>
+              <td>${platforms.find(p=>p.id===o.platform)?.name||o.platform}</td>
+              <td>${o.name}</td>
+              <td>${(o.price||0).toLocaleString()}</td>
+              <td>${o.discount?'نعم':'لا'}</td>
+              <td>
+                <button class="btn btn-sm btn-primary" onclick="editOffer('${o.id}')" style="font-size:10px;padding:5px 8px;">تعديل</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteOffer('${o.id}')" style="font-size:10px;padding:5px 8px;">حذف</button>
+              </td>
+            </tr>`).join('');
+        }
+
+        function renderAdminAdsIfActive() {
+            const tbody = document.querySelector('#adminAdsTable tbody');
+            if (!tbody) return;
+            const activeAds = allAds.filter(a => a.active !== false);
+            tbody.innerHTML = activeAds.map(a => `
+            <tr>
+              <td>${a.text}</td>
+              <td>${allOffers.find(o=>o.id==a.offerId)?.name||'غير مرتبط'}</td>
+              <td>
+                <button class="btn btn-sm btn-primary" onclick="editAd('${a.id}')" style="font-size:10px;padding:5px 8px;">تعديل</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteAd('${a.id}')" style="font-size:10px;padding:5px 8px;">حذف</button>
+              </td>
+            </tr>`).join('');
+        }
+
+        // ==================== SPLASH & INIT ====================
+        async function initApp() {
+            if (!firestoreReady) {
+                document.getElementById('splashScreen').classList.add('hidden');
+                alert('⚠️ Firebase غير مهيأ. افتح Console وأضف بيانات مشروعك.');
+                document.getElementById('authContainer').classList.add('active');
+                return;
+            }
+            try {
+                await ensureAdminExists();
+                await seedDefaultData();
+                setupRealtimeListeners();
+            } catch (e) {
+                console.error('خطأ في التهيئة:', e);
+            }
+            setTimeout(() => {
+                document.getElementById('splashScreen').classList.add('hidden');
+                const saved = sessionStorage.getItem('currentUserEmail');
+                if (saved) {
+                    db.collection('users').doc(saved).get().then(doc => {
+                        if (doc.exists) {
+                            currentUser = { id: doc.id, ...doc.data() };
+                            if (currentUser.isAdmin) showAdminPanel();
+                            else showApp();
+                        } else {
+                            showAuth();
+                        }
+                    }).catch(() => showAuth());
+                } else {
+                    showAuth();
+                }
+            }, 2200);
+        }
+        initApp();
+
+        // ==================== AUTH ====================
+        function showAuth() {
+            document.getElementById('authContainer').classList.add('active');
+            document.getElementById('appContainer').classList.remove('active');
+            document.getElementById('adminContainer').classList.remove('active');
+            document.getElementById('loginCard').style.display = 'block';
+            document.getElementById('registerCard').style.display = 'none';
+        }
+
+        function showLogin() {
+            document.getElementById('loginCard').style.display = 'block';
+            document.getElementById('registerCard').style.display = 'none';
+        }
+
+        function showRegister() {
+            document.getElementById('loginCard').style.display = 'none';
+            document.getElementById('registerCard').style.display = 'block';
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            if (!email || !pass) return toast('يرجى ملء جميع الحقول', 'error');
+            if (!firestoreReady) return toast('Firebase غير مهيأ', 'error');
+            try {
+                const docRef = db.collection('users').doc(email);
+                const doc = await docRef.get();
+                if (!doc.exists) return toast('البريد أو كلمة المرور غير صحيحة', 'error');
+                const userData = doc.data();
+                if (userData.password !== pass) return toast('البريد أو كلمة المرور غير صحيحة', 'error');
+                currentUser = { id: doc.id, ...userData };
+                sessionStorage.setItem('currentUserEmail', email);
+                if (currentUser.isAdmin) showAdminPanel();
+                else showApp();
+            } catch (e) {
+                console.error(e);
+                toast('حدث خطأ في الاتصال', 'error');
+            }
+        }
+
+        async function handleRegister() {
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+            if (!name || !email || !pass) return toast('يرجى ملء جميع الحقول', 'error');
+            if (!firestoreReady) return toast('Firebase غير مهيأ', 'error');
+            try {
+                const docRef = db.collection('users').doc(email);
+                const doc = await docRef.get();
+                if (doc.exists) return toast('البريد الإلكتروني مستخدم بالفعل', 'error');
+                const newUser = { name, email, password: pass, isAdmin: false, createdAt: Date.now() };
+                await docRef.set(newUser);
+                currentUser = { id: email, ...newUser };
+                sessionStorage.setItem('currentUserEmail', email);
+                showApp();
+                toast('تم إنشاء الحساب بنجاح!');
+            } catch (e) {
+                console.error(e);
+                toast('حدث خطأ في الاتصال', 'error');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            sessionStorage.removeItem('currentUserEmail');
+            document.getElementById('authContainer').classList.remove('active');
+            document.getElementById('appContainer').classList.remove('active');
+            document.getElementById('adminContainer').classList.remove('active');
+            document.getElementById('loginCard').style.display = 'block';
+            document.getElementById('registerCard').style.display = 'none';
+            showAuth();
+        }
+
+        // ==================== APP ====================
+        function showApp() {
+            document.getElementById('authContainer').classList.remove('active');
+            document.getElementById('appContainer').classList.add('active');
+            document.getElementById('adminContainer').classList.remove('active');
+            document.getElementById('displayName').textContent = currentUser?.name || 'مستخدم';
+            updateNotifBadge();
+            renderPlatforms();
+            renderOffers();
+            renderAds();
+            renderAvgRating();
+            switchPage('pageHome', document.querySelector('.nav-item[data-page="pageHome"]'));
+        }
+
+        function showAdminPanel() {
+            document.getElementById('authContainer').classList.remove('active');
+            document.getElementById('appContainer').classList.remove('active');
+            document.getElementById('adminContainer').classList.add('active');
+            renderAdminOffersIfActive();
+            renderAdminAdsIfActive();
+            renderAdminOrders();
+            renderAdminUserSelect();
+            renderAdminExpImages();
+        }
+
+        function switchPage(pageId, navEl) {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if (navEl) navEl.classList.add('active');
+            if (pageId === 'pageOrders') renderMyOrders();
+            if (pageId === 'pageHome') { renderAds();
+                renderAvgRating(); }
+        }
+
+        // ==================== PLATFORMS ====================
+        const platforms = [
+            { id: 'instagram', name: 'انستغرام', icon: 'fa-brands fa-instagram', colorClass: 'instagram' },
+            { id: 'facebook', name: 'فيسبوك', icon: 'fa-brands fa-facebook', colorClass: 'facebook' },
+            { id: 'tiktok', name: 'تيك توك', icon: 'fa-brands fa-tiktok', colorClass: 'tiktok' },
+            { id: 'youtube', name: 'يوتيوب', icon: 'fa-brands fa-youtube', colorClass: 'youtube' },
+            { id: 'snapchat', name: 'سناب شات', icon: 'fa-brands fa-snapchat', colorClass: 'snapchat' },
+            { id: 'twitter', name: 'تويتر', icon: 'fa-brands fa-x-twitter', colorClass: 'twitter' },
+            { id: 'telegram', name: 'تليغرام', icon: 'fa-brands fa-telegram', colorClass: 'telegram' },
+            { id: 'whatsapp', name: 'واتساب', icon: 'fa-brands fa-whatsapp', colorClass: 'whatsapp' },
+        ];
+
+        function renderPlatforms() {
+            const grid = document.getElementById('platformGrid');
+            grid.innerHTML = platforms.map(p => `
+            <div class="platform-card ${p.colorClass}" onclick="filterByPlatform('${p.id}')">
+              <i class="${p.icon}"></i>
+              <span class="plat-name">${p.name}</span>
+            </div>`).join('');
+        }
+
+        function filterByPlatform(platformId) {
+            const filtered = allOffers.filter(o => o.platform === platformId && o.active !== false);
+            const scroll = document.getElementById('offersScroll');
+            if (filtered.length === 0) { toast('لا توجد عروض لهذه المنصة حالياً', 'info'); return; }
+            scroll.innerHTML = filtered.map(o => createOfferCard(o)).join('');
+            scroll.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function createOfferCard(o) {
+            const plat = platforms.find(p => p.id === o.platform);
+            const icon = plat ? plat.icon : 'fa-solid fa-globe';
+            const colorClass = plat ? plat.colorClass : '';
+            return `
+            <div class="offer-card" onclick="openOrderModal('${o.id}')">
+              ${o.discount ? '<span class="offer-badge">خصم</span>' : ''}
+              <div class="offer-platform ${colorClass}"><i class="${icon}"></i></div>
+              <div class="offer-name">${o.name}</div>
+              <div class="offer-desc">${o.desc||''}</div>
+              <div class="offer-price-row">
+                <div><span class="offer-price">${(o.price||0).toLocaleString()} د.ع</span>${o.discount ? `<span class="offer-old-price">${(o.oldPrice||0).toLocaleString()}</span>` : ''}</div>
+                <button class="btn btn-sm btn-primary">طلب</button>
+              </div>
+            </div>`;
+        }
+
+        function renderOffers() {
+            const activeOffers = allOffers.filter(o => o.active !== false);
+            const scroll = document.getElementById('offersScroll');
+            scroll.innerHTML = activeOffers.map(o => createOfferCard(o)).join('');
+        }
+
+        // ==================== ADS ====================
+        function renderAds() {
+            const activeAds = allAds.filter(a => a.active !== false);
+            const container = document.getElementById('adBannerContainer');
+            if (activeAds.length === 0) { container.style.display = 'none'; return; }
+            container.style.display = 'block';
+            const ad = activeAds[0];
+            document.getElementById('adTitle').textContent = ad.text;
+            document.getElementById('mainAdBanner').setAttribute('data-ad-offer', ad.offerId || '');
+        }
+
+        function goToAdOffer() {
+            const offerId = document.getElementById('mainAdBanner').getAttribute('data-ad-offer');
+            if (offerId) {
+                const offer = allOffers.find(o => o.id === offerId);
+                if (offer) { openOrderModal(offer.id); return; }
+            }
+            switchPage('pageHome', document.querySelector('.nav-item[data-page="pageHome"]'));
+        }
+
+        // ==================== ORDERS ====================
+        function openOrderModal(offerId) {
+            if (!currentUser) return toast('يرجى تسجيل الدخول أولاً', 'error');
+            const offer = allOffers.find(o => o.id === offerId);
+            if (!offer) return;
+            const modalHTML = `
+            <div class="modal-overlay" id="orderModalOverlay" onclick="if(event.target===this)closeModal('orderModalOverlay')">
+              <div class="modal">
+                <i class="fa-solid fa-xmark close-modal" onclick="closeModal('orderModalOverlay')"></i>
+                <h3>تقديم طلب</h3>
+                <p style="margin-bottom:8px;"><strong>${offer.name}</strong></p>
+                <p style="color:var(--gold);font-weight:700;font-size:18px;">${(offer.price||0).toLocaleString()} د.ع</p>
+                <div class="input-group"><label>رابط الحساب</label><input type="text" id="orderLink" placeholder="رابط الحساب المراد رشقه"></div>
+                <div class="input-group"><label>ملاحظات</label><textarea id="orderNotes" placeholder="أي ملاحظات إضافية..."></textarea></div>
+                <p style="font-size:13px;color:var(--text2);margin:8px 0;">طرق الدفع:</p>
+                <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;font-size:12px;">
+                  <p><strong>زين كاش:</strong> 07853607192 (حواله) <button class="copy-btn btn-sm" onclick="copyText('07853607192',this)">نسخ</button></p>
+                  <p><strong>ماستركارد:</strong> 4948183217 <button class="copy-btn btn-sm" onclick="copyText('4948183217',this)">نسخ</button></p>
+                  <p><strong>آسيا أسيل:</strong> 07780239452 (تحويل) <button class="copy-btn btn-sm" onclick="copyText('07780239452',this)">نسخ</button></p>
+                </div>
+                <div class="upload-area" onclick="document.getElementById('proofImageInput').click()">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                  <p style="font-size:13px;">اضغط لرفع صورة إثبات التحويل</p>
+                  <img id="proofPreview" style="display:none;">
+                  <input type="file" id="proofImageInput" accept="image/*" style="display:none;" onchange="previewProofImage(this)">
+                </div>
+                <button class="btn btn-primary" onclick="submitOrder('${offer.id}')" style="margin-top:12px;">تأكيد الطلب</button>
+              </div>
+            </div>`;
+            document.getElementById('modalContainer').innerHTML = modalHTML;
+        }
+
+        function previewProofImage(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('proofPreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function submitOrder(offerId) {
+            const link = document.getElementById('orderLink')?.value.trim();
+            const notes = document.getElementById('orderNotes')?.value.trim();
+            const proofImg = document.getElementById('proofPreview')?.src || '';
+            if (!link) return toast('يرجى إدخال رابط الحساب', 'error');
+            if (!proofImg || proofImg === window.location.href) return toast('يرجى رفع صورة إثبات التحويل', 'error');
+            if (!firestoreReady) return toast('Firebase غير مهيأ', 'error');
+            const offer = allOffers.find(o => o.id === offerId);
+            const order = {
+                userId: currentUser.email,
+                userName: currentUser.name,
+                offerId,
+                offerName: offer?.name || '',
+                platform: offer?.platform || '',
+                price: offer?.price || 0,
+                link,
+                notes,
+                proofImage: proofImg,
+                status: 'pending',
+                createdAt: Date.now()
+            };
+            try {
+                await db.collection('orders').add(order);
+                closeModal('orderModalOverlay');
+                toast('تم تقديم الطلب بنجاح! سنتواصل معك قريباً');
+            } catch (e) {
+                console.error(e);
+                toast('حدث خطأ في إرسال الطلب', 'error');
+            }
+        }
+
+        function renderMyOrders() {
+            const list = document.getElementById('myOrdersList');
+            const myOrders = allOrders.filter(o => o.userId === currentUser?.email).reverse();
+            if (myOrders.length === 0) {
+                list.innerHTML = '<p style="text-align:center;color:var(--text3);padding:30px;">لا توجد طلبات حالياً</p>';
+                return;
+            }
+            const statusMap = { pending: 'قيد المراجعة', approved: 'مقبول', completed: 'مكتمل', rejected: 'مرفوض' };
+            const statusColor = { pending: 'var(--gold)', approved: 'var(--success)', completed: 'var(--primary)',
+                rejected: 'var(--danger)' };
+            list.innerHTML = myOrders.map(o => `
+              <div class="offer-card" style="margin-bottom:10px;min-width:auto;">
+                <p><strong>${o.offerName}</strong></p>
+                <p style="font-size:12px;color:var(--text2);">الرابط: ${o.link}</p>
+                <p style="font-size:12px;">السعر: ${(o.price||0).toLocaleString()} د.ع</p>
+                <p style="color:${statusColor[o.status]};font-weight:600;">الحالة: ${statusMap[o.status]}</p>
+                ${o.proofImage ? `<img src="${o.proofImage}" style="max-width:100%;max-height:120px;border-radius:8px;margin-top:6px;">` : ''}
+                <p style="font-size:10px;color:var(--text3);">${new Date(o.createdAt).toLocaleString('ar-IQ')}</p>
+              </div>`).join('');
+        }
+
+        // ==================== CHAT ====================
+        function openChat() {
+            if (!currentUser) return;
+            const userEmail = currentUser.email;
+            const modalHTML = `
+            <div class="modal-overlay" id="chatModalOverlay" onclick="if(event.target===this)closeModal('chatModalOverlay')">
+              <div class="modal">
+                <i class="fa-solid fa-xmark close-modal" onclick="closeChatModal()"></i>
+                <h3><i class="fa-solid fa-headset"></i> الدعم الفوري</h3>
+                <div class="chat-container">
+                  <div class="chat-messages" id="chatMessages">
+                    <p style="text-align:center;color:var(--text3);">جار التحميل...</p>
+                  </div>
+                  <div class="chat-input-row">
+                    <input type="text" id="chatInput" placeholder="اكتب رسالتك...">
+                    <button class="btn btn-sm btn-primary" onclick="sendChatMessage()">إرسال</button>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+            document.getElementById('modalContainer').innerHTML = modalHTML;
+            // Real-time listener for this user's chat
+            if (unsubMessages) unsubMessages();
+            unsubMessages = db.collection('messages')
+                .where('userEmail', '==', userEmail)
+                .orderBy('time', 'asc')
+                .onSnapshot(snapshot => {
+                    const msgContainer = document.getElementById('chatMessages');
+                    if (!msgContainer) return;
+                    const msgs = [];
+                    snapshot.forEach(doc => msgs.push(doc.data()));
+                    msgContainer.innerHTML = msgs.map(m => `
+                      <div class="chat-msg ${m.from==='user'?'sent':'received'}">
+                        ${m.text}
+                        <div class="msg-time">${new Date(m.time).toLocaleTimeString('ar-IQ',{hour:'2-digit',minute:'2-digit'})}</div>
+                      </div>`).join('') || '<p style="text-align:center;color:var(--text3);">ابدأ محادثة مع الدعم</p>';
+                    msgContainer.scrollTop = msgContainer.scrollHeight;
+                });
+        }
+
+        function closeChatModal() {
+            if (unsubMessages) { unsubMessages();
+                unsubMessages = null; }
+            closeModal('chatModalOverlay');
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input?.value.trim();
+            if (!text || !currentUser || !firestoreReady) return;
+            try {
+                await db.collection('messages').add({
+                    userEmail: currentUser.email,
+                    from: 'user',
+                    text,
+                    time: Date.now()
+                });
+                input.value = '';
+            } catch (e) {
+                console.error(e);
+                toast('خطأ في الإرسال', 'error');
+            }
+        }
+
+        // ==================== NOTIFICATIONS ====================
+        function updateNotifBadge() {
+            const badge = document.getElementById('notifBadge');
+            if (!badge) return;
+            const unread = allNotifications.filter(n => {
+                const readBy = n.readBy || [];
+                return !readBy.includes(currentUser?.email);
+            }).length;
+            if (unread > 0) { badge.style.display = 'inline';
+                badge.textContent = unread; } else { badge.style.display = 'none'; }
+        }
+
+        function openNotifications() {
+            const userEmail = currentUser?.email || '';
+            const modalHTML = `
+            <div class="modal-overlay" id="notifModalOverlay" onclick="if(event.target===this)closeModal('notifModalOverlay')">
+              <div class="modal">
+                <i class="fa-solid fa-xmark close-modal" onclick="closeModal('notifModalOverlay')"></i>
+                <h3><i class="fa-solid fa-bell"></i> الإشعارات</h3>
+                <div id="notifList">
+                  ${allNotifications.slice().reverse().map(n => {
+                    const read = (n.readBy||[]).includes(userEmail);
+                    return `
+                    <div style="padding:10px;background:${read?'var(--surface2)':'rgba(124,58,237,0.1)'};border-radius:8px;margin-bottom:6px;cursor:pointer;" onclick="markNotifRead('${n.id}')">
+                      <p style="font-size:13px;">${n.text}</p>
+                      <span style="font-size:10px;color:var(--text3);">${new Date(n.time).toLocaleString('ar-IQ')}</span>
+                    </div>`;
+                  }).join('')}
+                  ${allNotifications.length===0?'<p style="text-align:center;color:var(--text3);">لا توجد إشعارات</p>':''}
+                </div>
+              </div>
+            </div>`;
+            document.getElementById('modalContainer').innerHTML = modalHTML;
+            // Mark all as read
+            allNotifications.forEach(n => markNotifReadSilent(n.id));
+        }
+
+        async function markNotifRead(notifId) {
+            await markNotifReadSilent(notifId);
+            updateNotifBadge();
+        }
+
+        async function markNotifReadSilent(notifId) {
+            if (!firestoreReady || !currentUser) return;
+            const ref = db.collection('notifications').doc(notifId);
+            try {
+                await ref.update({
+                    readBy: firebase.firestore.FieldValue.arrayUnion(currentUser.email)
+                });
+            } catch (e) { /* ignore */ }
+        }
+
+        async function sendGlobalNotification() {
+            const text = document.getElementById('notifMessage')?.value.trim();
+            if (!text) return toast('اكتب نص الإشعار', 'error');
+            if (!firestoreReady) return;
+            try {
+                await db.collection('notifications').add({
+                    text,
+                    time: Date.now(),
+                    readBy: []
+                });
+                document.getElementById('notifMessage').value = '';
+                toast('تم إرسال الإشعار للجميع');
+            } catch (e) {
+                console.error(e);
+                toast('خطأ في الإرسال', 'error');
+            }
+        }
+
+        function toggleNotificationsSetting() {
+            notifEnabled = !notifEnabled;
+            updateNotifToggleUI();
+            toast(notifEnabled ? 'الإشعارات مفعلة' : 'الإشعارات معطلة');
+        }
+
+        function updateNotifToggleUI() {
+            const toggle = document.getElementById('notifToggle');
+            if (toggle) {
+                if (notifEnabled) toggle.classList.add('on');
+                else toggle.classList.remove('on');
+            }
+        }
+
+        function toggleLang() {
+            toast('اللغة العربية هي اللغة الافتراضية حالياً');
+        }
+
+        // ==================== RATING ====================
+        function openRatingModal() {
+            const modalHTML = `
+            <div class="modal-overlay" id="ratingModalOverlay" onclick="if(event.target===this)closeModal('ratingModalOverlay')">
+              <div class="modal" style="text-align:center;">
+                <i class="fa-solid fa-xmark close-modal" onclick="closeModal('ratingModalOverlay')"></i>
+                <h3>تقييم التطبيق</h3>
+                <p style="color:var(--text2);margin-bottom:12px;">ما تقييمك لتجربتك؟</p>
+                <div id="starSelector" style="font-size:36px;cursor:pointer;display:flex;justify-content:center;gap:6px;">
+                  ${[1,2,3,4,5].map(i=>`<i class="fa-regular fa-star" data-star="${i}" onmouseover="highlightStars(${i})" onclick="submitRating(${i})" style="color:var(--gold);"></i>`).join('')}
+                </div>
+                <p id="ratingHint" style="color:var(--text3);margin-top:8px;">اختر عدد النجوم</p>
+              </div>
+            </div>`;
+            document.getElementById('modalContainer').innerHTML = modalHTML;
+        }
+
+        function highlightStars(count) {
+            const stars = document.querySelectorAll('#starSelector i');
+            stars.forEach((s, i) => { s.className = i < count ? 'fa-solid fa-star' : 'fa-regular fa-star'; });
+            const hints = ['', 'سيء', 'مقبول', 'جيد', 'جيد جداً', 'ممتاز'];
+            document.getElementById('ratingHint').textContent = hints[count] || '';
+        }
+
+        async function submitRating(stars) {
+            if (!currentUser) return toast('يرجى تسجيل الدخول', 'error');
+            if (!firestoreReady) return;
+            try {
+                await db.collection('ratings').doc(currentUser.email).set({
+                    userId: currentUser.email,
+                    userName: currentUser.name,
+                    stars,
+                    time: Date.now()
+                });
+                closeModal('ratingModalOverlay');
+                toast('شكراً لتقييمك! 🌟');
+            } catch (e) {
+                console.error(e);
+                toast('خطأ في التقييم', 'error');
+            }
+        }
+
+        function renderAvgRating() {
+            const avg = allRatings.length > 0 ?
+                (allRatings.reduce((s, r) => s + r.stars, 0) / allRatings.length).toFixed(1) : 0;
+            document.getElementById('avgRatingDisplay').textContent = `(${avg} - ${allRatings.length} تقييم)`;
+            const starsDisplay = document.getElementById('avgStarsDisplay');
+            if (starsDisplay) {
+                const fullStars = Math.round(parseFloat(avg));
+                starsDisplay.innerHTML = [1, 2, 3, 4, 5].map(i =>
+                    `<i class="${i<=fullStars?'fa-solid fa-star':'fa-regular fa-star'}" style="color:var(--gold);font-size:16px;"></i>`
+                ).join('');
+            }
+        }
+
+        // ==================== EXPERIENCE GALLERY ====================
+        function openExperienceGallery() {
+            const images = allExpImages;
+            const modalHTML = `
+            <div class="modal-overlay" id="expModalOverlay" onclick="if(event.target===this)closeModal('expModalOverlay')">
+              <div class="modal">
+                <i class="fa-solid fa-xmark close-modal" onclick="closeModal('expModalOverlay')"></i>
+                <h3>تجربة المستخدمين</h3>
+                <p style="text-align:center;color:var(--text2);font-size:13px;">صور قبل وبعد</p>
+                <div class="exp-gallery">
+                  ${images.length>0?images.map(img=>`
+                    <div class="exp-card"><img src="${img.imageData}" alt="تجربة"></div>
+                  `).join(''):'<p style="text-align:center;color:var(--text3);grid-column:span 2;">لا توجد صور حالياً</p>'}
+                </div>
+              </div>
+            </div>`;
+            document.getElementById('modalContainer').innerHTML = modalHTML;
+        }
+
+        async function uploadExpImage() {
+            const input = document.getElementById('expImageInput');
+            const file = input.files[0];
+            if (!file || !firestoreReady) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    await db.collection('expImages').add({
+                        imageData: e.target.result,
+                        uploadedAt: Date.now()
+                    });
+                    toast('تم رفع الصورة');
+                } catch (err) {
+                    console.error(err);
+                    toast('خطأ في رفع الصورة', 'error');
+                }
+            };
+            reader.readAsDataURL(file);
+            input.value = '';
+        }
+
+        function renderAdminExpImages() {
+            const container = document.getElementById('adminExpImages');
+            if (!container) return;
+            container.innerHTML = allExpImages.map((img, i) => `
+            <div style="position:relative;display:inline-block;">
+              <img src="${img.imageData}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;">
+              <i class="fa-solid fa-trash" style="position:absolute;top:-6px;right:-6px;color:var(--danger);cursor:pointer;font-size:14px;" onclick="deleteExpImage('${img.id}')"></i>
+            </div>`).join('');
+        }
+
+        async function deleteExpImage(id) {
+            if (!firestoreReady) return;
+            try {
+                await db.collection('expImages').doc(id).delete();
+                toast('تم الحذف');
+            } catch (e) {
+                console.error(e);
+                toast('خطأ في الحذف', 'error');
+            }
+        }
+
+        // ==================== PAYMENT INFO ====================
+        function openPaymentInfo() {
+            const modalHTML = `
+            <div class="modal-overlay" id="payModalOverlay" onclick="if(event.target===this)closeModal('payModalOverlay')">
+              <div class="modal">
+                <i class="fa-solid fa-xmark close-modal" onclick="closeModal('payModalOverlay')"></i>
+                <h3><i class="fa-solid fa-credit-card"></i> طرق الدفع</h3>
+                <div class="payment-card">
+                  <div class="pay-info"><div class="pay-name">زين كاش</div><div class="pay-number">07853607192</div><div class="pay-type">حواله</div></div>
+                  <button class="copy-btn" onclick="copyText('07853607192',this)"><i class="fa-solid fa-copy"></i> نسخ</button>
+                </div>
+                <div class="payment-card">
+                  <div class="pay-info"><div class="pay-name">ماستركارد</div><div class="pay-number">4948183217</div></div>
+                  <button class="copy-btn" onclick="copyText('4948183217',this)"><i class="fa-solid fa-copy"></i> نسخ</button>
+                </div>
+                <div class="payment-card">
+                  <div class="pay-info"><div class="pay-name">آسيا أسيل</div><div class="pay-number">07780239452</div><div class="pay-type">تحويل</div></div>
+                  <button class="copy-btn" onclick="copyText('07780239452',this)"><i class="fa-solid fa-copy"></i> نسخ</button>
+                </div>
+              </div>
+            </div>`;
+            document.getElementById('modalContainer').innerHTML = modalHTML;
+        }
+
+        function copyText(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                btn.classList.add('copied');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> تم';
+                setTimeout(() => { btn.classList.remove('copied');
+                    btn.innerHTML = '<i class="fa-solid fa-copy"></i> نسخ'; }, 1800);
+                toast('تم النسخ!');
+            }).catch(() => toast('فشل النسخ', 'error'));
+        }
+
+        // ==================== ADMIN MANAGEMENT ====================
+        async function openAddOfferModal() {
+            const modalHTML = `
+            <div class="modal-overlay" id="addOfferOverlay" onclick="if(event.target===this)closeModal('addOfferOverlay')">
+              <div class="modal">
+                <i class="fa-solid fa-xmark close-modal" onclick="closeModal('addOfferOverlay')"></i>
+                <h3>إضافة عرض جديد</h3>
+                <div class="input-group"><label>المنصة</label><select id="newOfferPlatform">${platforms.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div>
+                <div class="input-group"><label>اسم العرض</label><input type="text" id="newOfferName"></div>
+                <div class="input-group"><label>الوصف</label><input type="text" id="newOfferDesc"></div>
+                <div class="input-group"><label>السعر (د.ع)</label><input type="number" id="newOfferPrice"></div>
+                <div class="input-group"><label>السعر القديم (د.ع)</label><input type="number" id="newOfferOldPrice"></div>
+                <div class="input-group"><label><input type="checkbox" id="newOfferDiscount" checked> عليه خصم</label></div>
+                <button class="btn btn-primary" onclick="addOffer()">إضافة</button>
+              </div>
+            </div>`;
+            document.getElementById('modalContainer').innerHTML = modalHTML;
+        }
+
+        async function addOffer() {
+            const platform = document.getElementById('newOfferPlatform')?.value;
+            const name = document.getElementById('newOfferName')?.value.trim();
+            const desc = document.getElementById('newOfferDesc')?.value.trim();
+            const price = parseInt(document.getElementById('newOfferPrice')?.value || 0);
+            const oldPrice = parseInt(document.getElementById('newOfferOldPrice')?.value || 0);
+            const discount = document.getElementById('newOfferDiscount')?.checked || false;
+            if (!name || !price) return toast('يرجى ملء الحقول المطلوبة', 'error');
+            if (!firestoreReady) return;
+            try {
+                await db.collection('offers').add({
+                    platform,
+                    name,
+                    desc,
+                    price,
+                    oldPrice,
+                    discount,
+                    active: true,
+                    createdAt: Date.now()
+                });
+                closeModal('addOfferOverlay');
+                toast('تمت الإضافة');
+            } catch (e) { console.error(e);
+                toast('خطأ في الإضافة', 'error'); }
+        }
+
+        function editOffer(id) {
+            const offer = allOffers.find(o => o.id === id);
+            if (!offer) return;
+            const modalHTML = `
+            <div class="modal-overlay" id="editOfferOverlay" onclick="if(event.target===this)closeModal('editOfferOverlay')">
+              <div class="modal">
+                <i class="fa-solid fa-xmark close-modal" onclick="closeModal('editOfferOverlay')"></i>
+                <h3>تعديل العرض</h3>
+                <div class="input-group"><label>المنصة</label><select id="editOfferPlatform">${platforms.map(p=>`<option value="${p.id}" ${offer.platform===p.id?'selected':''}>${p.name}</option>`).join('')}</select></div>
+                <div class="input-group"><label>اسم العرض</label><input type="text" id="editOfferName" value="${offer.name}"></div>
+                <div class="input-group"><label>الوصف</label><input type="text" id="editOfferDesc" value="${offer.desc||''}"></div>
+                <div class="input-group"><label>السعر</label><input type="number" id="editOfferPrice" value="${offer.price}"></div>
+                <div class="input-group"><label>السعر القديم</label><input type="number" id="editOfferOldPrice" value="${offer.oldPrice||0}"></div>
+                <div class="input-group"><label><input type="checkbox" id="editOfferDiscount" ${offer.discount?'checked':''}> عليه خصم</label></div>
+                <button class="btn btn-primary" onclick="saveEditOffer('${id}')">حفظ</button>
+              </div>
+            </div>`;
+            document.getElementById('modalContainer').innerHTML = modalHTML;
+        }
+
+        async function saveEditOffer(id) {
+            if (!firestoreReady) return;
+            const data = {
+                platform: document.getElementById('editOfferPlatform')?.value,
+                name: document.getElementById('editOfferName')?.value.trim(),
+                desc: document.getElementById('editOfferDesc')?.value.trim(),
+                price: parseInt(document.getElementById('editOfferPrice')?.value || 0),
+                oldPrice: parseInt(document.getElementById('editOfferOldPrice')?.value || 0),
+                discount: document.getElementById('editOfferDiscount')?.checked || false,
+            };
+            try {
+                await db.collection('offers').doc(id).update(data);
+                closeModal('editOfferOverlay');
+                toast('تم التعديل');
+            } catch (e) { console.error(e);
+                toast('خطأ في التعديل', 'error'); }
+        }
+
+        async function deleteOffer(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا العرض؟')) return;
+            if (!firestoreReady) return;
+            try {
+                await db.collection('offers').doc(id).delete();
+                toast('تم الحذف');
+            } catch (e) { console.error(e);
+                toast('خطأ في الحذف', 'error'); }
+        }
+
+        async function openAddAdModal() {
+            const offerOptions = allOffers.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+            const modalHTML = `
+            <div class="modal-overlay" id="addAdOverlay" onclick="if(event.target===this)closeModal('addAdOverlay')">
+              <div class="modal">
+                <i class="fa-solid fa-xmark close-modal" onclick="closeModal('addAdOverlay')"></i>
+                <h3>إضافة إعلان جديد</h3>
+                <div class="input-group"><label>نص الإعلان</label><input type="text" id="newAdText"></div>
+                <div class="input-group"><label>مرتبط بعرض</label><select id="newAdOfferId"><option value="">بدون</option>${offerOptions}</select></div>
+                <button class="btn btn-primary" onclick="addAd()">إضافة</button>
+              </div>
+            </div>`;
+            document.getElementById('modalContainer').innerHTML = modalHTML;
+        }
+
+        async function addAd() {
+            const text = document.getElementById('newAdText')?.value.trim();
+            const offerId = document.getElementById('newAdOfferId')?.value || null;
+            if (!text) return toast('يرجى كتابة نص الإعلان', 'error');
+            if (!firestoreReady) return;
+            try {
+                await db.collection('ads').add({ text, offerId, active: true, createdAt: Date.now() });
+                closeModal('addAdOverlay');
+                toast('تمت الإضافة');
+            } catch (e) { console.error(e);
+                toast('خطأ في الإضافة', 'error'); }
+        }
+
+        function editAd(id) {
+            const ad = allAds.find(a => a.id === id);
+            if (!ad) return;
+            const offerOptions = allOffers.map(o =>
+                `<option value="${o.id}" ${ad.offerId==o.id?'selected':''}>${o.name}</option>`).join('');
+            const modalHTML = `
+            <div class="modal-overlay" id="editAdOverlay" onclick="if(event.target===this)closeModal('editAdOverlay')">
+              <div class="modal">
+                <i class="fa-solid fa-xmark close-modal" onclick="closeModal('editAdOverlay')"></i>
+                <h3>تعديل الإعلان</h3>
+                <div class="input-group"><label>نص الإعلان</label><input type="text" id="editAdText" value="${ad.text}"></div>
+                <div class="input-group"><label>مرتبط بعرض</label><select id="editAdOfferId"><option value="">بدون</option>${offerOptions}</select></div>
+                <button class="btn btn-primary" onclick="saveEditAd('${id}')">حفظ</button>
+              </div>
+            </div>`;
+            document.getElementById('modalContainer').innerHTML = modalHTML;
+        }
+
+        async function saveEditAd(id) {
+            if (!firestoreReady) return;
+            const text = document.getElementById('editAdText')?.value.trim();
+            const offerId = document.getElementById('editAdOfferId')?.value || null;
+            try {
+                await db.collection('ads').doc(id).update({ text, offerId });
+                closeModal('editAdOverlay');
+                toast('تم التعديل');
+            } catch (e) { console.error(e);
+                toast('خطأ في التعديل', 'error'); }
+        }
+
+        async function deleteAd(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا الإعلان؟')) return;
+            if (!firestoreReady) return;
+            try {
+                await db.collection('ads').doc(id).delete();
+                toast('تم الحذف');
+            } catch (e) { console.error(e);
+                toast('خطأ في الحذف', 'error'); }
+        }
+
+        async function updateOrderStatus(orderId, status) {
+            if (!firestoreReady) return;
+            try {
+                await db.collection('orders').doc(orderId).update({ status });
+                toast('تم تحديث الحالة');
+            } catch (e) { console.error(e); }
+        }
+
+        async function deleteOrder(orderId) {
+            if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
+            if (!firestoreReady) return;
+            try {
+                await db.collection('orders').doc(orderId).delete();
+                toast('تم حذف الطلب');
+            } catch (e) { console.error(e); }
+        }
+
+        function renderAdminOrders() {
+            const container = document.getElementById('adminOrdersList');
+            if (!container) return;
+            const orders = allOrders.slice().reverse();
+            if (orders.length === 0) { container.innerHTML =
+                    '<p style="color:var(--text3);text-align:center;">لا توجد طلبات</p>'; return; }
+            container.innerHTML = orders.map(o => `
+            <div style="background:var(--surface2);border-radius:8px;padding:10px;margin-bottom:8px;font-size:12px;">
+              <p><strong>${o.userName}</strong> (${o.userId})</p>
+              <p>العرض: ${o.offerName} | السعر: ${(o.price||0).toLocaleString()} د.ع</p>
+              <p>الرابط: ${o.link}</p>
+              <p>الحالة: <select onchange="updateOrderStatus('${o.id}',this.value)" style="font-size:11px;">
+                <option value="pending" ${o.status==='pending'?'selected':''}>قيد المراجعة</option>
+                <option value="approved" ${o.status==='approved'?'selected':''}>مقبول</option>
+                <option value="completed" ${o.status==='completed'?'selected':''}>مكتمل</option>
+                <option value="rejected" ${o.status==='rejected'?'selected':''}>مرفوض</option>
+              </select></p>
+              ${o.proofImage?`<img src="${o.proofImage}" style="max-width:100%;max-height:100px;border-radius:6px;margin-top:4px;cursor:pointer;" onclick="window.open('${o.proofImage}')">`:'<span style="color:var(--danger);">لا توجد صورة إثبات</span>'}
+              <p style="font-size:10px;color:var(--text3);">${new Date(o.createdAt).toLocaleString('ar-IQ')}</p>
+              <button class="btn btn-sm btn-danger" onclick="deleteOrder('${o.id}')" style="font-size:10px;">حذف الطلب</button>
+            </div>`).join('');
+        }
+
+        function renderAdminUserSelect() {
+            const select = document.getElementById('adminUserSelect');
+            if (!select) return;
+            const currentVal = select.value;
+            const userEmails = [...new Set(allUsers.map(u => u.email))];
+            select.innerHTML = '<option value="">-- اختر مستخدم --</option>' + userEmails.map(e =>
+                `<option value="${e}" ${e===currentVal?'selected':''}>${e}</option>`).join('');
+        }
+
+        function adminLoadUserChat() {
+            const email = document.getElementById('adminUserSelect')?.value;
+            const msgContainer = document.getElementById('adminChatMessages');
+            if (!msgContainer) return;
+            if (!email) { msgContainer.innerHTML =
+                    '<p style="color:var(--text3);text-align:center;">اختر مستخدماً لعرض المحادثة</p>'; return; }
+            if (unsubMessages) unsubMessages();
+            unsubMessages = db.collection('messages')
+                .where('userEmail', '==', email)
+                .orderBy('time', 'asc')
+                .onSnapshot(snapshot => {
+                    const msgs = [];
+                    snapshot.forEach(doc => msgs.push(doc.data()));
+                    msgContainer.innerHTML = msgs.map(m => `
+                    <div class="chat-msg ${m.from==='user'?'received':'sent'}">
+                      ${m.text}
+                      <div class="msg-time">${new Date(m.time).toLocaleTimeString('ar-IQ',{hour:'2-digit',minute:'2-digit'})} - ${m.from==='user'?'المستخدم':'أنت'}</div>
+                    </div>`).join('') || '<p style="color:var(--text3);text-align:center;">لا توجد رسائل</p>';
+                    msgContainer.scrollTop = msgContainer.scrollHeight;
+                });
+        }
+
+        async function adminSendMessage() {
+            const email = document.getElementById('adminUserSelect')?.value;
+            const input = document.getElementById('adminChatInput');
+            const text = input?.value.trim();
+            if (!email || !text) return toast('اختر مستخدماً واكتب رسالة', 'error');
+            if (!firestoreReady) return;
+            try {
+                await db.collection('messages').add({
+                    userEmail: email,
+                    from: 'admin',
+                    text,
+                    time: Date.now()
+                });
+                input.value = '';
+            } catch (e) { console.error(e);
+                toast('خطأ في الإرسال', 'error'); }
+        }
+
+        // ==================== HELPERS ====================
+        function closeModal(overlayId) {
+            const overlay = document.getElementById(overlayId);
+            if (overlay) overlay.remove();
+            document.getElementById('modalContainer').innerHTML = '';
+        }
+
+        function toast(msg, type = 'success') {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.textContent = msg;
+            if (type === 'error') { t.style.background = 'var(--danger)';
+                t.style.boxShadow = '0 8px 25px rgba(239,68,68,0.4)'; }
+            if (type === 'info') { t.style.background = 'var(--primary)';
+                t.style.boxShadow = '0 8px 25px rgba(124,58,237,0.4)'; }
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
+        }
+
+        console.log('🚀 متجر رشق - Firebase Firestore مُفعّل');
+        console.log('👤 حساب الأدمن: admin@mtger.iq / Admin123');
+        console.log('☁️ قاعدة البيانات سحابية ومشتركة بين جميع المستخدمين');
+        console.log('⚠️ لا تنس استبدال firebaseConfig ببيانات مشروعك من Firebase Console');
+    </script>
+</body>
+</html>
