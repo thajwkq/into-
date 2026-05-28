@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>نيون كورة - Neon Kora</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --neon-green: #00ff88;
+    --neon-blue: #0055ff;
+    --neon-pink: #ff007f;
+    --bg-dark: #050505;
+    --card-bg: #111;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Cairo', sans-serif;
+    scroll-behavior: smooth;
+}
+
+body {
+    background: var(--bg-dark);
+    color: white;
+    padding-bottom: 90px;
+    overflow-x: hidden;
+}
+
+header {
+    background: linear-gradient(90deg, var(--neon-green), var(--neon-blue));
+    padding: 20px;
+    text-align: center;
+    font-size: 26px;
+    font-weight: bold;
+    box-shadow: 0 0 20px var(--neon-green);
+}
+
+.main-section {
+    padding: 20px;
+    display: none;
+}
+
+.main-section.active-section {
+    display: block;
+}
+
+.section-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    padding-right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#news-section .section-title { border-right: 5px solid var(--neon-green); color: var(--neon-green); }
+#transfers-section .section-title { border-right: 5px solid var(--neon-blue); color: var(--neon-blue); }
+#matches-section .section-title { border-right: 5px solid var(--neon-pink); color: var(--neon-pink); }
+
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.news-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: .3s;
+    position: relative;
+}
+
+#news-section .news-card { box-shadow: 0 0 15px rgba(0, 255, 136, 0.15); }
+#transfers-section .news-card { box-shadow: 0 0 15px rgba(0, 85, 255, 0.15); }
+
+.news-card:hover { transform: translateY(-5px); }
+
+.image-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+}
+
+.news-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.watermark {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(5, 5, 5, 0.8);
+    color: var(--neon-green);
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 6px;
+    border: 1px solid var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
+    z-index: 5;
+}
+
+.news-content { padding: 15px; }
+.news-content h3 { margin-bottom: 10px; font-size: 18px; line-height: 1.4; }
+.news-content p { color: #aaa; font-size: 14px; line-height: 1.6; }
+
+/* تصميم فاصل اليوم الرئيسي */
+.date-header {
+    background: linear-gradient(90deg, rgba(255, 0, 127, 0.2), transparent);
+    color: #fff;
+    padding: 10px 15px;
+    margin: 30px 0 15px 0;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    border-right: 5px solid var(--neon-pink);
+    text-shadow: 0 0 10px var(--neon-pink);
+}
+
+/* تصميم فاصل البطولة والدوري الاحترافي */
+.tournament-header {
+    background: #161616;
+    color: #00ff88;
+    padding: 10px 15px;
+    margin: 15px 0 10px 0;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+/* كروت المباريات */
+.match-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #222;
+    transition: 0.2s;
+}
+
+.match-card:hover {
+    border-color: rgba(255, 0, 127, 0.4);
+    background: #151515;
+}
+
+.team {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 40%;
+}
+
+.team.home { justify-content: flex-start; }
+.team.away { justify-content: flex-end; flex-direction: row-reverse; }
+
+.team-icon-placeholder {
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 85, 255, 0.1);
+    border: 1px solid var(--neon-blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.team-name {
+    font-weight: bold;
+    font-size: 14px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.match-info {
+    text-align: center;
+    width: 20%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.match-time {
+    background: rgba(255, 0, 127, 0.1);
+    color: var(--neon-pink);
+    border: 1px solid var(--neon-pink);
+    padding: 3px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    direction: ltr;
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(13, 13, 13, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid #222;
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    z-index: 100;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #666;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.nav-item span.icon { font-size: 22px; margin-bottom: 4px; }
+.nav-item.active-news { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+.nav-item.active-transfers { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
+.nav-item.active-matches { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
+</style>
+</head>
+
+<body>
+
+<header>
+    ⚽ نيون كورة - Neon Kora
+</header>
+
+<section id="news-section" class="main-section">
+    <h2 class="section-title">📰 الأخبار العاجلة</h2>
+    <div class="news-grid" id="newsContainer">
+        <p style="color: #aaa; text-align: center; grid-column: 1/-1;">جاري جلب أحدث الأخبار من السيرفر...</p>
+    </div>
+</section>
+
+<section id="transfers-section" class="main-section">
+    <h2 class="section-title">🔄 سوق الانتقالات</h2>
+    <div class="news-grid" id="transfersContainer">
+        <p style="color: #aaa; text-align: center; grid-column: 1/-1;">جاري تحديث صفقات الميركاتو...</p>
+    </div>
+</section>
+
+<section id="matches-section" class="main-section active-section">
+    <h2 class="section-title">⚽ جدول مباريات الأسبوع</h2>
+    <div id="matchesContainer">
+        <p style="color: #aaa; text-align: center;">جاري تشغيل واجهة الاتصال المباشر ومزامنة المباريات الجارية والقادمة...</p>
+    </div>
+</section>
+
+<nav class="bottom-nav">
+    <div class="nav-item" onclick="switchTab('news-section', this, 'active-news')">
+        <span class="icon">📰</span>
+        <span>الأخبار</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('transfers-section', this, 'active-transfers')">
+        <span class="icon">🔄</span>
+        <span>الانتقالات</span>
+    </div>
+    <div class="nav-item active-matches" onclick="switchTab('matches-section', this, 'active-matches')">
+        <span class="icon">⚽</span>
+        <span>المباريات</span>
+    </div>
+</nav>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAqVn95G-kDSwdnd2tr-UFhL4twDFvBa5Y",
+    authDomain: "footballnew-9d15a.firebaseapp.com",
+    projectId: "footballnew-9d15a",
+    storageBucket: "footballnew-9d15a.firebasestorage.app",
+    messagingSenderId: "167129883946",
+    appId: "1:167129883946:web:b8be90da80da938b582a53",
+    measurementId: "G-P2GCN3M052"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const newsContainer = document.getElementById("newsContainer");
+const transfersContainer = document.getElementById("transfersContainer");
+const matchesContainer = document.getElementById("matchesContainer");
+
+window.switchTab = function(sectionId, element, activeClass) {
+    document.querySelectorAll('.main-section').forEach(sec => sec.classList.remove('active-section'));
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active-news', 'active-transfers', 'active-matches');
+    });
+    
+    document.getElementById(sectionId).classList.add('active-section');
+    element.classList.add(activeClass);
+    window.scrollTo(0, 0);
+}
+
+async function loadFirebaseNews() {
+    try {
+        const querySnapshot = await getDocs(collection(db, "news"));
+        newsContainer.innerHTML = ""; transfersContainer.innerHTML = "";
+        let hasNews = false; let hasTransfers = false;
+
+        querySnapshot.forEach((doc) => {
+            const news = doc.data();
+            const newsImage = news.image ? news.image : 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=600';
+            
+            const cardHTML = `
+                <div class="news-card">
+                    <div class="image-container">
+                        <div class="watermark">Neon Kora ⚽</div>
+                        <img src="${newsImage}" alt="Neon Kora">
+                    </div>
+                    <div class="news-content">
+                        <h3>${news.title || 'بدون عنوان حصرى'}</h3>
+                        <p>${news.description || 'لا يوجد تفاصيل إضافية للخبر.'}</p>
+                    </div>
+                </div>
+            `;
+
+            const textToSearch = ((news.title || '') + (news.description || '')).toLowerCase();
+            if (textToSearch.includes('انتقال') || textToSearch.includes('صفقة') || textToSearch.includes('وقع') || textToSearch.includes('ميركاتو') || textToSearch.includes('لاعب') || textToSearch.includes('رسمياً')) {
+                transfersContainer.innerHTML += cardHTML;
+                hasTransfers = true;
+            } else {
+                newsContainer.innerHTML += cardHTML;
+                hasNews = true;
+            }
+        });
+        if(!hasNews) newsContainer.innerHTML = "<p style='text-align:center; grid-column:1/-1; color:#aaa;'>لا توجد أخبار عامة حالياً.</p>";
+        if(!hasTransfers) transfersContainer.innerHTML = "<p style='text-align:center; grid-column:1/-1; color:#aaa;'>لا توجد صفقات انتقالات منشورة حالياً.</p>";
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+async function fetchWeeklyMatches() {
+    // الـ Token الخاص بك المفعّل
+    const myFreeToken = "bb5bf42a682d459589616ebdb1524da3"; 
+
+    try {
+        // نطلب مباشرة رابط السيرفر لأنه سيعمل على جيثب بدون حاجة لوسيط
+        const response = await fetch('https://api.football-data.org/v4/matches', {
+            method: 'GET',
+            headers: {
+                'X-Auth-Token': myFreeToken
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('فشل الاستجابة من السيرفر');
+        }
+
+        const data = await response.json();
+        const matches = data.matches || [];
+
+        matchesContainer.innerHTML = "";
+
+        if (matches.length === 0) {
+            matchesContainer.innerHTML = "<p style='text-align:center; color:#aaa; padding: 20px;'>لا توجد مباريات مجدولة اليوم في باقة الدوريات الأساسية المتاحة.</p>";
+            return;
+        }
+
+        const grouped = {};
+
+        matches.forEach(match => {
+            const matchDateObj = new Date(match.utcDate);
+            const dayKey = matchDateObj.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+            const leagueName = match.competition.name;
+
+            if (!grouped[dayKey]) grouped[dayKey] = {};
+            if (!grouped[dayKey][leagueName]) grouped[dayKey][leagueName] = [];
+
+            grouped[dayKey][leagueName].push(match);
+        });
+
+        for (const day in grouped) {
+            matchesContainer.innerHTML += `<div class="date-header">📅 ${day}</div>`;
+
+            for (const league in grouped[day]) {
+                matchesContainer.innerHTML += `
+                    <div class="tournament-header">
+                        <span>🏆</span> ${league}
+                    </div>
+                `;
+
+                grouped[day][league].forEach(match => {
+                    const homeTeam = match.homeTeam.name;
+                    const awayTeam = match.awayTeam.name;
+                    
+                    const matchDateObj = new Date(match.utcDate);
+                    const matchTime = matchDateObj.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+
+                    matchesContainer.innerHTML += `
+                        <div class="match-card">
+                            <div class="team home">
+                                <div class="team-icon-placeholder">⚽</div>
+                                <span class="team-name">${homeTeam}</span>
+                            </div>
+                            <div class="match-info">
+                                <span class="match-time">${matchTime}</span>
+                            </div>
+                            <div class="team away">
+                                <div class="team-icon-placeholder">⚽</div>
+                                <span class="team-name">${awayTeam}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+    } catch (error) {
+        console.error(error);
+        matchesContainer.innerHTML = "<p style='text-align:center; color:#aaa; padding:20px;'>تأكد من تفعيل خاصية GitHub Pages للمستودع لكي يتم استقبال البيانات الحية فوراً بدون قيود أمنية محليّة.</p>";
+    }
+}
+
+loadFirebaseNews();
+fetchWeeklyMatches();
+</script>
+
+</body>
+</html>
