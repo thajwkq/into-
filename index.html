@@ -3,265 +3,1208 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>نيون كورة - Neon Kora PRO</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-
+<title>Neon Kora | كرة القدم المباشرة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 <style>
-:root {
+  :root {
     --neon-green: #00ff88;
-    --neon-blue: #0055ff;
-    --neon-pink: #ff007f;
-    --bg-dark: #050505;
-    --card-bg: #111;
-}
+    --neon-blue: #00c8ff;
+    --neon-red: #ff2d55;
+    --bg-dark: #060810;
+    --bg-card: #0d1220;
+    --bg-card2: #111827;
+    --border: #1a2540;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --live-red: #ff2d55;
+    --gold: #ffd700;
+    --purple: #a855f7;
+  }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
     font-family: 'Cairo', sans-serif;
-}
-
-body {
     background: var(--bg-dark);
-    color: white;
-    padding-bottom: 90px;
-}
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding-bottom: 80px;
+  }
 
-header {
-    background: linear-gradient(90deg, var(--neon-green), var(--neon-blue));
-    padding: 20px;
-    text-align: center;
-    font-size: 26px;
-    font-weight: bold;
-    box-shadow: 0 0 20px var(--neon-green);
-}
-
-.main-section {
-    padding: 20px;
-    display: none;
-}
-
-.main-section.active-section {
-    display: block;
-}
-
-.section-title {
-    font-size: 24px;
-    margin-bottom: 20px;
-}
-
-.news-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-}
-
-.news-card {
-    background: var(--card-bg);
-    border-radius: 15px;
-    overflow: hidden;
-}
-
-.news-content {
-    padding: 15px;
-}
-
-/* MATCHES */
-.match-card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    border: 1px solid #222;
-}
-
-.team-name {
-    font-weight: bold;
-}
-
-.match-time {
-    color: var(--neon-pink);
-}
-
-/* NAV */
-.bottom-nav {
+  body::before {
+    content: '';
     position: fixed;
-    bottom: 0;
-    width: 100%;
-    background: #0d0d0d;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(0,255,136,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 30% at 20% 80%, rgba(0,200,255,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(6,8,16,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,255,136,0.15);
+    padding: 0 16px;
+  }
+
+  .header-inner {
+    max-width: 700px;
+    margin: 0 auto;
     display: flex;
-    justify-content: space-around;
-    padding: 10px;
-}
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
 
-.nav-item {
-    color: #777;
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+  }
+
+  .logo::after {
+    content: 'NEON KORA';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: blur(12px);
+    opacity: 0.6;
+    z-index: -1;
+  }
+
+  .logo-sub {
+    font-family: 'Cairo', sans-serif;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    display: block;
+    margin-top: -4px;
+    -webkit-text-fill-color: var(--text-muted);
+  }
+
+  .header-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,45,85,0.15);
+    border: 1px solid rgba(255,45,85,0.4);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--live-red);
+    font-weight: 700;
+  }
+
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--live-red);
+    animation: pulse-red 1.2s infinite;
+  }
+
+  @keyframes pulse-red {
+    0%,100% { opacity:1; transform:scale(1); box-shadow: 0 0 0 0 rgba(255,45,85,0.6); }
+    50% { opacity:0.8; transform:scale(1.3); box-shadow: 0 0 0 6px rgba(255,45,85,0); }
+  }
+
+  .tabs {
+    max-width: 700px;
+    margin: 0 auto;
+    display: flex;
+    padding: 12px 16px 0;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 7px 18px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
-}
+    transition: all 0.25s;
+  }
 
-.nav-item.active-news { color: var(--neon-green); }
-.nav-item.active-transfers { color: var(--neon-blue); }
-.nav-item.active-matches { color: var(--neon-pink); }
+  .tab-btn.active {
+    background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,200,255,0.1));
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+    box-shadow: 0 0 12px rgba(0,255,136,0.2);
+  }
+
+  .tab-btn:hover:not(.active) {
+    border-color: rgba(0,255,136,0.3);
+    color: var(--text);
+  }
+
+  main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    margin-top: 8px;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .section-title .icon { font-size: 18px; }
+
+  .section-count {
+    font-size: 11px;
+    color: var(--neon-green);
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .league-group { margin-bottom: 20px; }
+
+  .league-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px 10px 0 0;
+    border-bottom: none;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+
+  .league-flag { font-size: 18px; }
+  .league-name { flex: 1; }
+
+  .match-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 14px 16px;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .match-card:last-child { border-radius: 0 0 10px 10px; }
+
+  .match-card::before {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: transparent;
+    transition: all 0.2s;
+  }
+
+  .match-card.live::before {
+    background: var(--live-red);
+    box-shadow: 0 0 10px var(--live-red);
+  }
+
+  .match-card:hover {
+    background: var(--bg-card2);
+    border-color: rgba(0,255,136,0.2);
+  }
+
+  .match-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .team {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .team.away { flex-direction: row-reverse; }
+
+  .team-logo {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .team-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .match-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 70px;
+  }
+
+  .score {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 20px;
+    font-weight: 900;
+    font-family: 'Orbitron', monospace;
+  }
+
+  .score-num { color: var(--text); }
+  .score-sep { color: var(--text-muted); font-size: 16px; }
+
+  .match-time {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+
+  .match-time.live {
+    background: rgba(255,45,85,0.15);
+    color: var(--live-red);
+    border: 1px solid rgba(255,45,85,0.35);
+    animation: live-pulse 2s infinite;
+  }
+
+  .match-time.finished {
+    background: rgba(100,116,139,0.15);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  .match-time.upcoming {
+    background: rgba(0,200,255,0.1);
+    color: var(--neon-blue);
+    border: 1px solid rgba(0,200,255,0.25);
+  }
+
+  @keyframes live-pulse {
+    0%,100% { opacity:1; }
+    50% { opacity:0.7; }
+  }
+
+  .match-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+
+  .match-events { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .event-badge {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+
+  .event-badge.goal {
+    background: rgba(0,255,136,0.12);
+    color: var(--neon-green);
+    border: 1px solid rgba(0,255,136,0.2);
+  }
+
+  .event-badge.card {
+    background: rgba(255,193,7,0.12);
+    color: #ffc107;
+    border: 1px solid rgba(255,193,7,0.2);
+  }
+
+  .event-badge.red {
+    background: rgba(255,45,85,0.12);
+    color: var(--live-red);
+    border: 1px solid rgba(255,45,85,0.2);
+  }
+
+  .news-grid { display: flex; flex-direction: column; gap: 12px; }
+
+  .news-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    gap: 0;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+  }
+
+  .news-card:hover {
+    border-color: rgba(0,255,136,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 0 20px rgba(0,255,136,0.05);
+  }
+
+  .news-card.featured { flex-direction: column; }
+  .news-card.featured .news-img { width: 100%; height: 180px; border-radius: 0; }
+
+  .news-img {
+    width: 110px;
+    height: 90px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #0d1a2e, #1a2540);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+  }
+
+  .news-img-placeholder {
+    width: 110px;
+    height: 90px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #0d1a2e, #1a2540);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+  }
+
+  .news-card.featured .news-img-placeholder { width: 100%; height: 180px; border-radius: 0; }
+
+  .news-body {
+    padding: 12px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .news-category {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 8px;
+    display: inline-block;
+    width: fit-content;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .news-category.breaking {
+    background: rgba(255,45,85,0.15);
+    color: var(--live-red);
+    border: 1px solid rgba(255,45,85,0.3);
+  }
+
+  .news-category.transfer {
+    background: rgba(168,85,247,0.15);
+    color: var(--purple);
+    border: 1px solid rgba(168,85,247,0.3);
+  }
+
+  .news-category.general {
+    background: rgba(0,200,255,0.1);
+    color: var(--neon-blue);
+    border: 1px solid rgba(0,200,255,0.25);
+  }
+
+  .news-title { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.5; }
+
+  .news-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .news-meta { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+  .news-time { font-size: 11px; color: var(--text-muted); }
+  .news-source { font-size: 11px; color: var(--neon-green); font-weight: 600; }
+
+  .transfer-grid { display: flex; flex-direction: column; gap: 10px; }
+
+  .transfer-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .transfer-card::before { content: ''; position: absolute; top: 0; right: 0; left: 0; height: 2px; }
+  .transfer-card.confirmed::before { background: linear-gradient(90deg, var(--neon-green), var(--neon-blue)); }
+  .transfer-card.rumour::before { background: linear-gradient(90deg, #ffc107, #ff6b35); }
+  .transfer-card.loan::before { background: linear-gradient(90deg, var(--purple), var(--neon-blue)); }
+
+  .transfer-card:hover {
+    border-color: rgba(0,255,136,0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+
+  .transfer-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+
+  .player-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a2540, #0d1220);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .player-info { flex: 1; }
+  .player-name { font-size: 15px; font-weight: 700; color: var(--text); }
+  .player-pos { font-size: 11px; color: var(--text-muted); }
+
+  .transfer-status {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 10px;
+  }
+
+  .transfer-status.confirmed {
+    background: rgba(0,255,136,0.12);
+    color: var(--neon-green);
+    border: 1px solid rgba(0,255,136,0.25);
+  }
+
+  .transfer-status.rumour {
+    background: rgba(255,193,7,0.12);
+    color: #ffc107;
+    border: 1px solid rgba(255,193,7,0.25);
+  }
+
+  .transfer-status.loan {
+    background: rgba(168,85,247,0.12);
+    color: var(--purple);
+    border: 1px solid rgba(168,85,247,0.25);
+  }
+
+  .transfer-flow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .club { display: flex; align-items: center; gap: 6px; flex: 1; }
+  .club-logo { font-size: 20px; }
+  .club-name { font-size: 12px; font-weight: 700; color: var(--text); }
+
+  .transfer-arrow {
+    font-size: 18px;
+    color: var(--neon-green);
+    flex-shrink: 0;
+    transform: scaleX(-1);
+  }
+
+  .transfer-fee {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .transfer-date { font-size: 11px; color: var(--text-muted); }
+
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(6,8,16,0.96);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(0,255,136,0.12);
+    z-index: 100;
+    padding: 0;
+    safe-area-inset-bottom: env(safe-area-inset-bottom);
+  }
+
+  .nav-inner { max-width: 700px; margin: 0 auto; display: flex; justify-content: space-around; }
+
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 0 16px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'Cairo', sans-serif;
+    font-size: 11px;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .nav-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 25%; right: 25%;
+    height: 2px;
+    background: var(--neon-green);
+    border-radius: 0 0 4px 4px;
+    transform: scaleX(0);
+    transition: transform 0.2s;
+  }
+
+  .nav-btn.active::before { transform: scaleX(1); }
+  .nav-btn.active { color: var(--neon-green); }
+  .nav-icon { font-size: 22px; line-height: 1; }
+
+  .loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+    gap: 10px;
+    flex-direction: column;
+  }
+
+  .loader-ring {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--neon-green);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader-text { font-size: 13px; color: var(--text-muted); }
+
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,45,85,0.15);
+    border: 1px solid rgba(255,45,85,0.35);
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--live-red);
+    letter-spacing: 0.5px;
+    animation: live-pulse 2s infinite;
+  }
+
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(0,255,136,0.04);
+    border: 1px solid rgba(0,255,136,0.1);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .stat-item { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 60px; }
+
+  .stat-num {
+    font-size: 22px;
+    font-weight: 900;
+    font-family: 'Orbitron', monospace;
+    background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .stat-label { font-size: 10px; color: var(--text-muted); text-align: center; }
+  .stat-divider { width: 1px; background: var(--border); align-self: stretch; }
+
+  .page { display: none; animation: fadeIn 0.3s ease; }
+  .page.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .update-notice {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .update-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--neon-green);
+    animation: pulse-green 2s infinite;
+  }
+
+  @keyframes pulse-green {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.5; transform:scale(0.8); }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+  }
+
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state .text { font-size: 15px; }
+
+  @media (max-width: 480px) {
+    .team-name { font-size: 12px; }
+    .score { font-size: 18px; }
+    .news-img-placeholder { width: 90px; height: 80px; font-size: 28px; }
+  }
 </style>
 </head>
-
 <body>
 
-<header>⚽ نيون كورة PRO</header>
+<header>
+  <div class="header-inner">
+    <div>
+      <div class="logo">NEON KORA</div>
+      <span class="logo-sub">⚽ كرة القدم المباشرة</span>
+    </div>
+    <div class="header-badge">
+      <div class="live-dot"></div>
+      مباشر
+    </div>
+  </div>
+</header>
 
-<!-- NEWS -->
-<section id="news-section" class="main-section active-section">
-    <h2 class="section-title">📰 الأخبار</h2>
+<div class="tabs" id="matchTabs" style="display:none;">
+  <button class="tab-btn active" onclick="filterMatches('all', this)">الكل</button>
+  <button class="tab-btn" onclick="filterMatches('live', this)">🔴 مباشر</button>
+  <button class="tab-btn" onclick="filterMatches('finished', this)">✅ منتهية</button>
+  <button class="tab-btn" onclick="filterMatches('upcoming', this)">⏳ قادمة</button>
+</div>
+
+<main>
+  <div class="page active" id="page-matches">
+    <div class="stats-bar" id="statsBar"></div>
+    <div class="update-notice">
+      <div class="update-dot"></div>
+      <span id="lastUpdate">جاري التحديث...</span>
+    </div>
+    <div id="matchesContainer"></div>
+  </div>
+
+  <div class="page" id="page-news">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">📰</span> آخر الأخبار</div>
+    </div>
     <div class="news-grid" id="newsContainer"></div>
-</section>
+  </div>
 
-<!-- TRANSFERS -->
-<section id="transfers-section" class="main-section">
-    <h2 class="section-title">🔄 الانتقالات</h2>
-    <div class="news-grid" id="transfersContainer"></div>
-</section>
+  <div class="page" id="page-transfers">
+    <div class="section-header">
+      <div class="section-title"><span class="icon">🔄</span> سوق الانتقالات</div>
+    </div>
+    <div class="transfer-grid" id="transfersContainer"></div>
+  </div>
+</main>
 
-<!-- MATCHES -->
-<section id="matches-section" class="main-section">
-    <h2 class="section-title">⚽ المباريات</h2>
-    <div id="matchesContainer">جاري التحميل...</div>
-</section>
-
-<!-- NAV -->
 <nav class="bottom-nav">
-    <div class="nav-item active-news" onclick="switchTab('news-section', this,'active-news')">📰 أخبار</div>
-    <div class="nav-item" onclick="switchTab('transfers-section', this,'active-transfers')">🔄 انتقالات</div>
-    <div class="nav-item" onclick="switchTab('matches-section', this,'active-matches')">⚽ مباريات</div>
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="switchPage('matches', this)">
+      <span class="nav-icon">⚽</span>
+      المباريات
+    </button>
+    <button class="nav-btn" onclick="switchPage('news', this)">
+      <span class="nav-icon">📰</span>
+      الأخبار
+    </button>
+    <button class="nav-btn" onclick="switchPage('transfers', this)">
+      <span class="nav-icon">🔄</span>
+      الانتقالات
+    </button>
+  </div>
 </nav>
 
+<!-- Firebase SDK -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+// ============================================================
+// FIREBASE INITIALIZATION
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* FIREBASE (بدون تغيير) */
 const firebaseConfig = {
-    apiKey: "AIzaSyAqVn95G-kDSwdnd2tr-UFhL4twDFvBa5Y",
-    authDomain: "footballnew-9d15a.firebaseapp.com",
-    projectId: "footballnew-9d15a",
-    storageBucket: "footballnew-9d15a.firebasestorage.app",
-    messagingSenderId: "167129883946",
-    appId: "1:167129883946:web:b8be90da80da938b582a53",
-    measurementId: "G-P2GCN3M052"
+  apiKey: "AIzaSyAqVn95G-kDSwdnd2tr-UFhL4twDFvBa5Y",
+  authDomain: "footballnew-9d15a.firebaseapp.com",
+  projectId: "footballnew-9d15a",
+  storageBucket: "footballnew-9d15a.firebasestorage.app",
+  messagingSenderId: "167129883946",
+  appId: "1:167129883946:web:b8be90da80da938b582a53",
+  measurementId: "G-P2GCN3M052"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* RAPID API */
-const RAPID_KEY = "fe1d9b3f77mshf3f73eaca80dabfp1cfcf9jsn4f5936b62777";
-const RAPID_HOST = "free-api-live-football-data.p.rapidapi.com";
+// ============================================================
+// RAPIDAPI CONFIGURATION
+// ============================================================
+const API_CONFIG = {
+  key: 'fe1d9b3f77mshf3f73eaca80dabfp1cfcf9jsn4f5936b62777',
+  host: 'free-api-live-football-data.p.rapidapi.com',
+  baseURL: 'https://free-api-live-football-data.p.rapidapi.com',
+  endpoints: {
+    liveMatches: '/football-current-live',
+    matchStatus: '/football-get-match-status',
+    popularLeagues: '/football-popular-leagues'
+  }
+};
 
-/* ELEMENTS */
-const newsContainer = document.getElementById("newsContainer");
-const transfersContainer = document.getElementById("transfersContainer");
-const matchesContainer = document.getElementById("matchesContainer");
+// ============================================================
+// STATE
+// ============================================================
+let currentPage = 'matches';
+let currentFilter = 'all';
+let currentMatchData = [];
+let updateInterval = null;
 
-/* NAV SWITCH */
-window.switchTab = function(sectionId, element, activeClass){
-    document.querySelectorAll('.main-section').forEach(s=>s.classList.remove('active-section'));
-    document.getElementById(sectionId).classList.add('active-section');
+// ============================================================
+// NAVIGATION
+// ============================================================
+window.switchPage = function(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  btn.classList.add('active');
+  currentPage = page;
 
-    document.querySelectorAll('.nav-item').forEach(n=>{
-        n.classList.remove('active-news','active-transfers','active-matches');
+  const matchTabs = document.getElementById('matchTabs');
+  matchTabs.style.display = page === 'matches' ? 'flex' : 'none';
+};
+
+window.filterMatches = function(filter, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = filter;
+  renderMatchesFromData(currentMatchData);
+};
+
+// ============================================================
+// API FETCH (RapidAPI - Matches Only)
+// ============================================================
+async function fetchLiveMatches() {
+  try {
+    const response = await fetch(`${API_CONFIG.baseURL}${API_CONFIG.endpoints.liveMatches}`, {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-key': API_CONFIG.key,
+        'x-rapidapi-host': API_CONFIG.host,
+        'Content-Type': 'application/json'
+      }
     });
-
-    element.classList.add(activeClass);
-
-    if(sectionId === "matches-section"){
-        loadLiveMatches();
-    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('خطأ في جلب المباريات من RapidAPI:', error);
+    return null;
+  }
 }
 
-/* ================= FIREBASE NEWS ================= */
-async function loadNews(){
-    const querySnapshot = await getDocs(collection(db,"news"));
+function transformAPIData(apiData) {
+  if (!apiData || !apiData.response) return [];
 
-    newsContainer.innerHTML = "";
-    transfersContainer.innerHTML = "";
+  const leaguesMap = {};
 
-    let newsFound=false;
-    let transfersFound=false;
+  apiData.response.forEach(match => {
+    const leagueId = match.league?.id || 'unknown';
+    if (!leaguesMap[leagueId]) {
+      leaguesMap[leagueId] = {
+        id: leagueId,
+        name: match.league?.name || 'دوري',
+        flag: match.league?.flag || '🏆',
+        country: match.league?.country || '',
+        matches: []
+      };
+    }
+    leaguesMap[leagueId].matches.push({
+      id: match.fixture?.id,
+      home: match.teams?.home?.name || 'فريق 1',
+      away: match.teams?.away?.name || 'فريق 2',
+      homeScore: match.goals?.home || 0,
+      awayScore: match.goals?.away || 0,
+      time: match.fixture?.status?.elapsed || match.fixture?.status?.short || '--',
+      status: match.fixture?.status?.short === 'NS' ? 'upcoming' :
+              match.fixture?.status?.short === 'FT' ? 'finished' : 'live'
+    });
+  });
 
-    querySnapshot.forEach(doc=>{
-        const n = doc.data();
+  return Object.values(leaguesMap);
+}
 
-        const card = `
-        <div class="news-card">
-            <div class="news-content">
-                <h3>${n.title || "بدون عنوان"}</h3>
-                <p>${n.description || ""}</p>
+// ============================================================
+// RENDER MATCHES
+// ============================================================
+function renderMatchesFromData(leagues) {
+  const container = document.getElementById('matchesContainer');
+
+  if (!leagues || leagues.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">⚽</div><div class="text">لا توجد مباريات متاحة حالياً</div></div>`;
+    document.getElementById('statsBar').innerHTML = `
+      <div class="stat-item"><span class="stat-num">0</span><span class="stat-label">🔴 مباشر</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat-item"><span class="stat-num">0</span><span class="stat-label">✅ منتهية</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat-item"><span class="stat-num">0</span><span class="stat-label">⏳ قادمة</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat-item"><span class="stat-num">0</span><span class="stat-label">📋 الكل</span></div>
+    `;
+    return;
+  }
+
+  let totalLive = 0, totalFinished = 0, totalUpcoming = 0;
+  leagues.forEach(l => l.matches.forEach(m => {
+    if (m.status === 'live') totalLive++;
+    else if (m.status === 'finished') totalFinished++;
+    else totalUpcoming++;
+  }));
+
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-item"><span class="stat-num">${totalLive}</span><span class="stat-label">🔴 مباشر</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><span class="stat-num">${totalFinished}</span><span class="stat-label">✅ منتهية</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><span class="stat-num">${totalUpcoming}</span><span class="stat-label">⏳ قادمة</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><span class="stat-num">${totalLive+totalFinished+totalUpcoming}</span><span class="stat-label">📋 الكل</span></div>
+  `;
+
+  let html = '';
+  leagues.forEach(league => {
+    const filtered = currentFilter === 'all'
+      ? league.matches
+      : league.matches.filter(m => m.status === currentFilter);
+    if (filtered.length === 0) return;
+
+    html += `<div class="league-group">
+      <div class="league-header">
+        <span class="league-flag">${league.flag}</span>
+        <span class="league-name">${league.name}</span>
+      </div>`;
+
+    filtered.forEach(match => {
+      const isLive = match.status === 'live';
+      const isFinished = match.status === 'finished';
+      let timeClass = isLive ? 'live' : isFinished ? 'finished' : 'upcoming';
+
+      html += `
+        <div class="match-card ${isLive ? 'live' : ''}">
+          <div class="match-top">
+            <div class="team">
+              <div class="team-logo">🏠</div>
+              <span class="team-name">${match.home}</span>
             </div>
+            <div class="match-center">
+              ${isLive || isFinished                ? `<div class="score"><span class="score-num">${match.homeScore}</span><span class="score-sep">:</span><span class="score-num">${match.awayScore}</span></div>`
+                : `<div style="font-size:13px;color:var(--text-muted);font-weight:700;">VS</div>`
+              }
+              <span class="match-time ${timeClass}">${match.time}</span>
+            </div>
+            <div class="team away">
+              <div class="team-logo">✈️</div>
+              <span class="team-name">${match.away}</span>
+            </div>
+          </div>
         </div>`;
-
-        const text = (n.title+n.description).toLowerCase();
-
-        if(text.includes("انتقال")||text.includes("صفقة")||text.includes("ميركاتو")){
-            transfersContainer.innerHTML += card;
-            transfersFound=true;
-        } else {
-            newsContainer.innerHTML += card;
-            newsFound=true;
-        }
     });
 
-    if(!newsFound) newsContainer.innerHTML="لا توجد أخبار";
-    if(!transfersFound) transfersContainer.innerHTML="لا توجد انتقالات";
+    html += '</div>';
+  });
+
+  container.innerHTML = html || `<div class="empty-state"><div class="icon">🔍</div><div class="text">لا توجد مباريات تطابق الفلتر المحدد</div></div>`;
 }
 
-/* ================= LIVE MATCHES (RAPIDAPI) ================= */
-async function loadLiveMatches(){
-    try{
-        const res = await fetch(
-            "https://free-api-live-football-data.p.rapidapi.com/football-current-live",
-            {
-                headers:{
-                    "x-rapidapi-key":RAPID_KEY,
-                    "x-rapidapi-host":RAPID_HOST
-                }
-            }
-        );
+async function loadAndRenderMatches() {
+  const container = document.getElementById('matchesContainer');
+  container.innerHTML = `<div class="loader"><div class="loader-ring"></div><span class="loader-text">جاري تحميل المباريات من RapidAPI...</span></div>`;
 
-        const data = await res.json();
-        const matches = data.response || [];
+  const apiData = await fetchLiveMatches();
+  if (apiData && apiData.response && apiData.response.length > 0) {
+    currentMatchData = transformAPIData(apiData);
+  } else {
+    currentMatchData = [];
+  }
+  renderMatchesFromData(currentMatchData);
+}
 
-        let html = "";
+// ============================================================
+// FIREBASE - NEWS
+// ============================================================
+async function fetchNewsFromFirebase() {
+  try {
+    const newsCollection = collection(db, "news");
+    const q = query(newsCollection, orderBy("createdAt", "desc"));
+    const querySnapshot = await getDocs(q);
+    const news = [];
+    querySnapshot.forEach((doc) => {
+      news.push({ id: doc.id, ...doc.data() });
+    });
+    return news;
+  } catch (error) {
+    console.error('خطأ في جلب الأخبار من Firebase:', error);
+    return [];
+  }
+}
 
-        if(!matches.length){
-            html = "<p>لا توجد مباريات مباشرة الآن</p>";
-        }
+function renderNews(newsData) {
+  const container = document.getElementById('newsContainer');
 
-        matches.forEach(m=>{
-            html += `
-            <div class="match-card">
-                <span class="team-name">${m.homeTeam?.name || "Home"}</span>
-                <span class="match-time">🔴 LIVE</span>
-                <span class="team-name">${m.awayTeam?.name || "Away"}</span>
-            </div>`;
-        });
+  if (!newsData || newsData.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📰</div><div class="text">لا توجد أخبار متاحة حالياً</div></div>`;
+    return;
+  }
 
-        matchesContainer.innerHTML = html;
+  let html = '';
 
-    }catch(e){
-        console.error(e);
-        matchesContainer.innerHTML = "خطأ في جلب المباريات";
+  newsData.forEach((item, i) => {
+    const category = item.category || 'general';
+    const emoji = item.emoji || '⚽';
+    const timeAgo = item.time || 'منذ قليل';
+    const source = item.source || 'Neon Kora';
+
+    if (i === 0 && item.featured) {
+      html += `
+        <div class="news-card featured">
+          <div class="news-img-placeholder" style="width:100%;height:180px;">${emoji}</div>
+          <div class="news-body">
+            <span class="news-category ${category}">${getCategoryLabel(category)}</span>
+            <div class="news-title">${item.title}</div>
+            ${item.desc ? `<div class="news-desc">${item.desc}</div>` : ''}
+            <div class="news-meta">
+              <span class="news-time">🕐 ${timeAgo}</span>
+              <span class="news-source">${source}</span>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      html += `
+        <div class="news-card">
+          <div class="news-img-placeholder">${emoji}</div>
+          <div class="news-body">
+            <span class="news-category ${category}">${getCategoryLabel(category)}</span>
+            <div class="news-title">${item.title}</div>
+            ${item.desc ? `<div class="news-desc">${item.desc}</div>` : ''}
+            <div class="news-meta">
+              <span class="news-time">🕐 ${timeAgo}</span>
+              <span class="news-source">${source}</span>
+            </div>
+          </div>
+        </div>`;
     }
+  });
+
+  container.innerHTML = html;
 }
 
-/* INIT */
-loadNews();
-loadLiveMatches();
+async function loadAndRenderNews() {
+  const container = document.getElementById('newsContainer');
+  container.innerHTML = `<div class="loader"><div class="loader-ring"></div><span class="loader-text">جاري تحميل الأخبار من Firebase...</span></div>`;
 
+  const newsData = await fetchNewsFromFirebase();
+  renderNews(newsData);
+}
+
+function getCategoryLabel(cat) {
+  return { breaking: '🔴 عاجل', transfer: '🔄 انتقالات', general: '📋 أخبار' }[cat] || '📋 أخبار';
+}
+
+// ============================================================
+// FIREBASE - TRANSFERS
+// ============================================================
+async function fetchTransfersFromFirebase() {
+  try {
+    const transfersCollection = collection(db, "transfers");
+    const q = query(transfersCollection, orderBy("createdAt", "desc"));
+    const querySnapshot = await getDocs(q);
+    const transfers = [];
+    querySnapshot.forEach((doc) => {
+      transfers.push({ id: doc.id, ...doc.data() });
+    });
+    return transfers;
+  } catch (error) {
+    console.error('خطأ في جلب الانتقالات من Firebase:', error);
+    return [];
+  }
+}
+
+function renderTransfers(transfersData) {
+  const container = document.getElementById('transfersContainer');
+
+  if (!transfersData || transfersData.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🔄</div><div class="text">لا توجد انتقالات متاحة حالياً</div></div>`;
+    return;
+  }
+
+  const confirmed = transfersData.filter(t => t.status === 'confirmed');
+  const rumours = transfersData.filter(t => t.status === 'rumour');
+  const loans = transfersData.filter(t => t.status === 'loan');
+  const others = transfersData.filter(t => !['confirmed', 'rumour', 'loan'].includes(t.status));
+
+  const renderGroup = (title, items) => {
+    if (!items.length) return '';
+    let g = `<div class="section-header" style="margin-top:16px;margin-bottom:10px;">
+      <div class="section-title" style="font-size:13px;">${title}</div>
+      <span class="section-count">${items.length}</span>
+    </div>`;
+    items.forEach(t => {
+      const status = t.status || 'general';
+      g += `
+        <div class="transfer-card ${status}">
+          <div class="transfer-top">
+            <div class="player-avatar">${t.emoji || '⚽'}</div>
+            <div class="player-info">
+              <div class="player-name">${t.player || 'لاعب'}</div>
+              <div class="player-pos">${t.pos || ''}</div>
+            </div>
+            <span class="transfer-status ${status}">${getStatusLabel(status)}</span>
+          </div>
+          <div class="transfer-flow">
+            <div class="club">
+              <span class="club-logo">${t.fromLogo || '⚽'}</span>
+              <span class="club-name">${t.from || 'نادي'}</span>
+            </div>
+            <div class="transfer-arrow">→</div>
+            <div class="club" style="justify-content:flex-end;">
+              <span class="club-name">${t.to || 'نادي'}</span>
+              <span class="club-logo">${t.toLogo || '⚽'}</span>
+            </div>
+          </div>
+          <div class="transfer-fee">
+            <span>💰 ${t.fee || 'غير معلن'}</span>
+            <span class="transfer-date">📅 ${t.date || ''}</span>
+          </div>
+        </div>`;
+    });
+    return g;
+  };
+
+  let html = '';
+  html += renderGroup('✅ صفقات مؤكدة', confirmed);
+  html += renderGroup('🔴 إشاعات ساخنة', rumours);
+  html += renderGroup('🔵 إعارات', loans);
+  html += renderGroup('📋 انتقالات أخرى', others);
+
+  container.innerHTML = html || `<div class="empty-state"><div class="icon">🔄</div><div class="text">لا توجد انتقالات متاحة حالياً</div></div>`;
+}
+
+async function loadAndRenderTransfers() {
+  const container = document.getElementById('transfersContainer');
+  container.innerHTML = `<div class="loader"><div class="loader-ring"></div><span class="loader-text">جاري تحميل الانتقالات من Firebase...</span></div>`;
+
+  const transfersData = await fetchTransfersFromFirebase();
+  renderTransfers(transfersData);
+}
+
+function getStatusLabel(status) {
+  return { confirmed: '✅ مؤكدة', rumour: '🔴 إشاعة', loan: '🔵 إعارة' }[status] || '📋 أخرى';
+}
+
+// ============================================================
+// TIMESTAMP
+// ============================================================
+function updateTimestamp() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('lastUpdate').textContent = `آخر تحديث: ${h}:${m}:${s}`;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  loadAndRenderMatches();
+  loadAndRenderNews();
+  loadAndRenderTransfers();
+  document.getElementById('matchTabs').style.display = 'flex';
+  updateTimestamp();
+
+  // تحديث المباريات كل 60 ثانية
+  updateInterval = setInterval(() => {
+    if (currentPage === 'matches') {
+      loadAndRenderMatches();
+    }
+    updateTimestamp();
+  }, 60000);
+
+  // تحديث الأخبار والانتقالات كل 5 دقائق
+  setInterval(() => {
+    if (currentPage === 'news') {
+      loadAndRenderNews();
+    } else if (currentPage === 'transfers') {
+      loadAndRenderTransfers();
+    }
+  }, 300000);
+
+  setInterval(updateTimestamp, 5000);
+}
+
+document.addEventListener('DOMContentLoaded', init);
 </script>
-
 </body>
 </html>
